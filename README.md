@@ -15,3 +15,6 @@ For my scientific work in graduate school, I took the problem of computer vision
 
 # Lab: CombLetter (python)
 Two problems for finding the number of combinations of letters with some addition rules
+
+# Lab: MaskingFoto (python)
+A small project to test some assumptions about image masks.
