@@ -12,3 +12,6 @@ In input write positions of byte or bit in certain byte (write it with byte pos 
 
 # Lab: Matrix (python)
 For my scientific work in graduate school, I took the problem of computer vision. It was about operators such as Kenny, Sobel etc. So, i was in need in class like matrices to practice with
+
+# Lab: CombLetter (python)
+Two problems for finding the number of combinations of letters with some addition rules
