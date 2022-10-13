@@ -6,7 +6,7 @@ class App:
     def __init__(self):
         self.window = Tk()
         self.window.title("Masking picture")
-        self.window.geometry("550x450")
+        self.window.geometry("800x450")
         self.frame = Frame(self.window)
         self.frame.grid()
         self.image = Image.new('RGB', (400, 400), (240,240,240))
@@ -19,9 +19,9 @@ class App:
         self.lblChoosed = Label(self.frame, text="")
         self.lblChoosed.grid(column=0, row=1)
 
-        self.canvasW = 500
-        self.canvasH = 400
-        self.canvas = Canvas(self.window, height=self.canvasH, width=self.canvasW)
+        self.canvasW = 200
+        self.canvasH = 200
+        self.canvas = Canvas(self.window, height=self.canvasH, width=3*self.canvasW)
         self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
         self.canvas.grid(column=0, row=2)
 
@@ -44,7 +44,19 @@ class App:
             print((int(1/factor)*self.image.width,int(1/factor)*self.image.height))
         self.photo = ImageTk.PhotoImage(self.image)
         self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
+        self.imageGrey = self.getGrey()
+        self.photoGrey = ImageTk.PhotoImage(self.imageGrey)
+        self.с_imageGrey = self.canvas.create_image(self.image.width, 0, anchor='nw', image=self.photoGrey)
         self.canvas.grid(column=0, row=2)
+    def getGrey(self):
+        res = Image.new('RGB', (self.image.width, self.image.height), (0,0,0))
+        for y in range(self.image.height):
+            for x in range(self.image.width):
+                value = self.image.getpixel((x,y))
+                greyCol = int(value[0]*0.3+value[1]*0.59+value[2]*0.11)
+                print( value, greyCol)
+                res.putpixel((x,y), (greyCol,greyCol,greyCol))
+        return res
 
 
 app=App()
