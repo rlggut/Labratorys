@@ -1,5 +1,5 @@
 class Matrix:
-    def createNill(self):
+    def __createNill(self):
         self.matr=[]
         for i in range(self.n):
             nillVec=[]
@@ -15,7 +15,7 @@ class Matrix:
             m=n
         self.n=n
         self.m=m
-        self.createNill()
+        self.__createNill()
     def __str__(self):
         res=""
         for j in range(self.m):
@@ -46,7 +46,7 @@ class Matrix:
         res=Matrix(self.n, self.m)
         for j in range(self.m):
             for i in range(self.n):
-                res.__setItem(i,j,self.matr[i][j]+other.matr[i][j])
+                res.__setIElem(i, j, self.matr[i][j] + other.matr[i][j])
         return res
     def __sub__(self, other):
         return(self+(-1)*other)
@@ -69,9 +69,9 @@ class Matrix:
                 elemRes=0
                 for k in range(self.n):
                     elemRes+=self.matr[k][j]*other.matr[i][k]
-                res.__setItem(i,j,elemRes)
+                res.__setIElem(i, j, elemRes)
         return res
-    def __setItem(self, x, y, data):
+    def __setIElem(self, x, y, data):
         if not(isinstance(x, int)):
             return False
         if not(isinstance(y, int)):
@@ -81,7 +81,33 @@ class Matrix:
         if(y>=self.m)or(y<0):
             return False
         self.matr[x][y]=data
-
+    def getN(self):
+        return self.n
+    def getM(self):
+        return self.m
+    def setData(self, data):
+        if not (isinstance(data, list)):
+            return False
+        self.n = len(data)
+        self.m = len(data[0])
+        self.__createNill()
+        for j in range(self.m):
+            for i in range(self.n):
+                if(len(data[j])<=i):
+                    self.__setIElem(i, j, 0)
+                else:
+                    self.__setIElem(i, j, data[i][j])
+        return self
+    def getMatrXY(self,x,y):
+        if(x<0):
+            return False
+        if(y<0):
+            return False
+        if(x>=self.n):
+            return False
+        if(y>=self.m):
+            return False
+        return self.matr[x][y]
     def layOn(self,other):
         if not (isinstance(other, Matrix)):
             return 0
@@ -94,36 +120,19 @@ class Matrix:
             for x in range(self.n):
                 res+=self.matr[x][y]*other[x][y]
         return res
-    def SobelX(self):
+    def setSobelX(self):
         self.n=3
         self.m=3
         self.matr=[[-1, 0, 1],[-2, 0, 2],[-1, 0, 1]]
-    def SobelY(self):
+    def setSobelY(self):
         self.n=3
         self.m=3
         self.matr=[[-1, -2, -1],[0, 0, 0],[1, 2, 1]]
-    def PrewittX(self):
+    def setPrewittX(self):
         self.n=3
         self.m=3
         self.matr=[[-1, 0, 1],[-1, 0, 1],[-1, 0, 1]]
-    def PrewittY(self):
+    def setPrewittY(self):
         self.n=3
         self.m=3
         self.matr=[[-1, -1, -1],[0, 0, 0],[1, 1, 1]]
-
-    def f1(self):
-        self.n = 3
-        self.m = 3
-        self.matr = [[5, 6, 4], [8, 9, 7], [-4, -5, -3]]
-    def f2(self):
-        self.n = 3
-        self.m = 3
-        self.matr = [[3, 4, 9], [2, -1, 6], [5, 3, 5]]
-
-sob=Matrix()
-sob.f1()
-print(sob,'\n')
-prew=Matrix()
-prew.f2()
-print(prew,'\n')
-print(sob*prew,'\n')
