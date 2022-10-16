@@ -6,6 +6,30 @@ sys.path.append('/Users/GRL/Desktop/Labratorys')
 from Matrix import *
 import re
 
+def maskedImageMatrix(image, matrX, matrY, edge):
+    if not(isinstance(image, Image.Image)):
+        return False
+    if not(isinstance(matrX, Matrix)):
+        return False
+    if not(isinstance(matrY, Matrix)):
+        return False
+    res = Image.new('RGB', (image.width, image.height), (0,0,0))
+    for y in range(1,image.height-1):
+        for x in range(1,image.width-1):
+            gX = 0
+            gY = 0
+            for j in range(-1,2):
+                for i in range(-1,2):
+                    value = image.getpixel((x+i, y+j))
+                    if(isinstance(value,tuple)):
+                        value=((value[0]+value[1]+value[2])/3)
+                    gX += matrX.getMatrXY(i+1,j+1)*value
+                    gY += matrY.getMatrXY(i+1,j+1)*value
+            degree=pow(gX*gX+gY*gY,0.5)
+            if(degree> edge):
+                res.putpixel((x,y), (255,255,255))
+    return res
+
 class App:
     def __init__(self):
         self.window = Tk()
@@ -74,10 +98,13 @@ class App:
 
         self.lblEdge = Label(self.frame, text="Boundary detector")
         self.lblEdge.grid(column=0, row=10, columnspan=2)
-        self.edgeSpin = Spinbox(self.frame, from_ =0, to_=300, width=5, command=self.__getMaskPick)
+        self.edgeSpin = Spinbox(self.frame, from_ =0, to_=300, width=5, command=self.__getMaskPic)
         self.edgeSpin.grid(column=2, row=10)
+        self.edge = 100
+        self.edgeSpin.delete(0, len(self.edgeSpin.get()))
+        self.edgeSpin.insert(0, str(self.edge))
 
-        self.btnRecalc = Button(self.frame, text="Recalc", command=self.__getMaskPick, state=DISABLED)
+        self.btnRecalc = Button(self.frame, text="Recalc", command=self.__getMaskPic, state=DISABLED)
         self.btnRecalc.grid(column=0, row=11)
 
         self.canvas = Canvas(self.window, height=3*self.canvasH, width=1.2 * self.canvasW)
@@ -91,29 +118,31 @@ class App:
         self.btnRecalc["state"] = "normal"
         self.filename = file
         self.image = Image.open(file)
+        self.image.load()
         pattern = '[^\/]+\.\D+'
         file = re.search(pattern,file).group(0)
         self.lblChoosed.configure(text=file)
-        factorW = self.image.width/self.canvasW
-        factorH = self.image.height / self.canvasH
-        factor=max(factorW, factorH)
-        if(factor>1):
-            self.image=self.image.reduce(int(factor))
-        elif(factor<0.7):
-            self.image=self.image.resize((int(1/factor)*self.image.width,int(1/factor)*self.image.height))
+        factorW = self.canvasW / self.image.width
+        factorH = self.canvasH / self.image.height
+        factor=min(factorW, factorH)
+        self.image=self.image.resize((int(factor*self.image.width), int(factor*self.image.height)))
         self.photo = ImageTk.PhotoImage(self.image)
         self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
 
         self.imageGrey = self.__getGrey()
+        self.imageGrey.load()
         self.photoGrey = ImageTk.PhotoImage(self.imageGrey)
         self.с_imageGrey = self.canvas.create_image(0, self.canvasH, anchor='nw', image=self.photoGrey)
-        self.__getMaskPick()
-    def __getMaskPick(self):
+        self.__getMaskPic()
+    def __getMaskPic(self):
         if(self.filename==""):
             return False
+        if(re.match("[^0-9]",self.edgeSpin.get())):
+            self.edgeSpin.delete(0, len(self.edgeSpin.get()))
+            self.edgeSpin.insert(0, str(self.edge))
         self.edge=int(self.edgeSpin.get())
         self.__getMatrXY()
-        self.imageMasked = self.getMask(self.imageGrey, self.matrX, self.matrY, self.edge)
+        self.imageMasked = maskedImageMatrix(self.imageGrey, self.matrX, self.matrY, self.edge)
         self.photoMasked = ImageTk.PhotoImage(self.imageMasked)
         self.с_imageMasked = self.canvas.create_image(0, 2 * self.canvasH, anchor='nw', image=self.photoMasked)
         self.canvas.grid(column=3, row=0, rowspan=10)
@@ -140,27 +169,15 @@ class App:
         self.matrY.setData(matr)
 
     def __getGrey(self):
+        res = self.image.convert("L")
+        return res
+    def __getGreyOwn(self):
         res = Image.new('RGB', (self.image.width, self.image.height), (0,0,0))
         for y in range(self.image.height):
             for x in range(self.image.width):
                 value = self.image.getpixel((x,y))
                 greyCol = int(value[0]*0.3+value[1]*0.59+value[2]*0.11)
                 res.putpixel((x,y), (greyCol,greyCol,greyCol))
-        return res
-    def getMask(self, image, matrX, matrY, edge=100):
-        res = Image.new('RGB', (image.width, image.height), (0,0,0))
-        for y in range(1,image.height-1):
-            for x in range(1,image.width-1):
-                gX = 0
-                gY = 0
-                for j in range(-1,2):
-                    for i in range(-1,2):
-                        value = image.getpixel((x+i, y+j))
-                        gX += matrX.getMatrXY(i+1,j+1)*(value[0]+value[1]+value[2])/3
-                        gY += matrY.getMatrXY(i+1,j+1)*(value[0]+value[1]+value[2])/3
-                degree=pow(gX*gX+gY*gY,0.5)
-                if(degree> edge):
-                    res.putpixel((x,y), (255,255,255))
         return res
 
 app=App()
