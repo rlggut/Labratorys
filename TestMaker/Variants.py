@@ -6,6 +6,11 @@ class Variant():
         self.n = 1
         self.task1=Task_t1()
         self.tasks=[self.task1]
+    def getQuestions(self):
+        st=""
+        for i in range(self.num):
+            st=st+self.tasks[i].getQuestion()+"\n"
+        return(st)
     def getQuestion(self,num):
         if(num>self.n)or(num<=0):
             return
