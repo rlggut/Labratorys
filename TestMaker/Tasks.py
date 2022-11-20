@@ -1,26 +1,5 @@
 from abc import ABC, abstractmethod
-
-
-def from10(n,deg):
-    rs=""
-    while(n>0):
-        t=(n % deg)
-        if(t>=10):
-            rs=chr(ord('A')+t-10)+rs
-        else:
-            rs=chr(ord('0')+t)+rs
-        n=n//deg
-    return(rs)
-def to10(st,deg):
-    rs=0
-    for i in (range(len(st))):
-        rs=rs*deg
-        print(rs,' ',st[i])
-        if (ord(st[i])-ord('0')<=9):
-            rs=rs+(ord(st[i])-ord('0'))
-        else:
-            rs=rs+(ord(st[i])-ord('A'))+10
-    return(rs)
+from Common import *
 
 class Task(ABC):
     def __init__(self):
@@ -32,16 +11,16 @@ class Task(ABC):
     def setVariant(self,num):
         self.num=num
         self._Base__createTask()
-    def getText(self):
+    def getQuestion(self):
         return self.question
     def getAnswer(self):
         return self.answ
+class Task_t1(Task):
+    def _Base__createTask(self):
+        x = (self.num % 23) + 11
+        x = x * x + 11
+        x = (x % 31) + 17
+        y = (self.num % 5) + 4
+        self.question = 'Переведите число ' + str(x) + ' из десятичной в ' + str(y) + '-ричную'
+        self.answ = from10(x, y)
 
-class Variant():
-    def __init__(self):
-        self.n = 0
-    def getTask(self,num):
-        if(num>self.n):
-            return
-    def getTaskNumbers(self):
-        return self.n
