@@ -3,13 +3,21 @@ from Tasks import *
 
 class Variant():
     def __init__(self):
-        self.n = 1
-        self.task1=Task_t1()
-        self.tasks=[self.task1]
+        self.n = 4
+        self.task1_1=Task_t1_1()
+        self.task1_2=Task_t1_2()
+        self.task2_1=Task_t2_1()
+        self.task2_2=Task_t2_2()
+        self.tasks=[self.task1_1,self.task1_2,self.task2_1,self.task2_2]
     def getQuestions(self):
         st=""
         for i in range(self.num):
             st=st+self.tasks[i].getQuestion()+"\n"
+        return(st)
+    def getAnswers(self):
+        st=""
+        for i in range(self.num):
+            st=st+self.tasks[i].getAnswer()+"\n"
         return(st)
     def getQuestion(self,num):
         if(num>self.n)or(num<=0):
