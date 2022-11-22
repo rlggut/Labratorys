@@ -10,7 +10,7 @@ from calendar import monthrange
 class App:
     def __init__(self):
         self.window = Tk()
-        self.window.title("Masking picture")
+        self.window.title("Making class/home work")
         size="400x200"
         self.window.geometry(size)
         self.frame = Frame(self.window)
@@ -58,8 +58,9 @@ class App:
         self.lblVariant.grid(column=1, row=4, padx=10)
         self.entryKey = Entry(self.frame)
         self.entryKey.grid(column=2, row=4)
-        self.btnSaveKey = Button(self.frame, text="Set key", command=self.__SetVariantKey)
-        self.btnSaveKey.grid(column=3, row=4)
+        self.entryKey.insert(0,now.strftime("%A")+str(now.day)+str(now.month)+str(now.year%100))
+        #self.btnSaveKey = Button(self.frame, text="Set key", command=self.__SetVariantKey)
+        #self.btnSaveKey.grid(column=3, row=4)
 
         self.lblSaveTypeSelect = LabelFrame(self.frame, text='Create&Save', labelanchor=N)
         self.varSaveWork = IntVar()
@@ -83,21 +84,20 @@ class App:
                 ch='0'
             keyNum=(keyNum*10+ord(ch)-ord('0'))
             keyNum=keyNum % 1000000
-        print(keyNum)
         self.variant.setVariantNum(keyNum)
     def __SavingVariant(self):
-        #self.__SetVariantKey()
+        self.__SetVariantKey()
         footer=""
         if(self.varTypeWork.get()==1):
-            footer = "Homework"
+            footer = "Домашняя работа "
         else:
-            footer = "Classwork"
+            footer = "Классная работа "
         footer = footer+"              "+self.daySpin.get()+"/"+self.monthSpin.get()+"/"+str(int(self.yearSpin.get())%100)
 
         if(self.varSaveWork.get()):
             fopen = open(self.filenameDir+"/"+self.filenameSave, 'w')
             fopen.write(footer+"\n")
-            fopen.write(self.variant.getCategoriesQuestions())
+            fopen.write(self.variant.getAllCategoriesQuestions())
             fopen.close()
 
         asnswFileName = self.filenameSave
@@ -106,7 +106,7 @@ class App:
         if(self.varSaveAnswer.get()):
             fopen = open(self.filenameDir+"/"+asnswFileName, 'w')
             fopen.write(footer+"\n")
-            fopen.write(self.variant.getCategoriesQuestions())
+            fopen.write(self.variant.getAllCategoriesQuestions())
             fopen.close()
 
     def __saveFileDir(self):
