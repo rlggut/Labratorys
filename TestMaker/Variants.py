@@ -4,29 +4,57 @@ from Tasks import *
 class Variant():
     def __init__(self):
         self.n = 4
+        self.categories=["Number systems translation"]
         self.task1_1=Task_t1_1()
         self.task1_2=Task_t1_2()
         self.task2_1=Task_t2_1()
         self.task2_2=Task_t2_2()
-        self.tasks=[self.task1_1,self.task1_2,self.task2_1,self.task2_2]
-    def getQuestions(self):
+        self.taskCat=[[self.task1_1,self.task1_2,self.task2_1,self.task2_2]]
+
+    def getCategoriesQuestions(self):
+        st = ""
+        number = 1
+        for tsk in self.taskCat:
+            num=self.n%len(tsk)
+            st = st + '№' + str(number) + '. ' + tsk[num].getQuestion() + "\n"
+            number += 1
+        return (st)
+    def getCategoriesAnswers(self):
+        st = ""
+        number = 1
+        for tsk in self.taskCat:
+            num=self.n%len(tsk)
+            st = st + '№' + str(number) + '. ' + tsk[num].getAnswer() + "\n"
+            number += 1
+        return (st)
+    def getAllQuestions(self):
         st=""
-        for i in range(self.num):
-            st=st+self.tasks[i].getQuestion()+"\n"
+        number=1
+        for tsk in self.taskCat:
+            for task in tsk:
+                st=st+'№'+str(number)+'. '+task.getQuestion()+"\n"
+                number+=1
         return(st)
-    def getAnswers(self):
+    def getAllAnswers(self):
         st=""
-        for i in range(self.num):
-            st=st+self.tasks[i].getAnswer()+"\n"
+        number=1
+        for tsk in self.taskCat:
+            for task in tsk:
+                st=st+'№'+str(number)+'. '+task.getAnswer()+"\n"
+                number+=1
         return(st)
-    def getQuestion(self,num):
-        if(num>self.n)or(num<=0):
+    def getQuestion(self, cat, num):
+        if(cat>len(self.taskCat))or(cat<=0):
             return
-        return self.tasks[num-1].getQuestion()
-    def getAnswer(self,num):
-        if(num>self.n)or(num<=0):
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
             return
-        return self.tasks[num-1].getAnswer()
+        return self.taskCat[cat-1][num-1].getQuestion()
+    def getAnswer(self, cat, num):
+        if(cat>len(self.taskCat))or(cat<=0):
+            return
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
+            return
+        return self.taskCat[cat-1][num-1].getAnswer()
     def setVariantNum(self,num):
         for task in self.tasks:
             task.setVariant(num)
