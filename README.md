@@ -29,3 +29,13 @@ Two problems for finding the number of combinations of letters with some additio
 A small project to test some assumptions about image masks.
 
 [Wiki part](https://github.com/rlggut/Labratorys/wiki#lab-maskingfoto-python)
+
+# Lab: MaskEdgeFinding (python)
+Like prev lab, but this for finding edge number
+
+[Wiki part](https://github.com/rlggut/Labratorys/wiki#lab-maskedgefinding-python)
+
+# Lab: TestMaker(python)
+Somewhat for test creation for computer science
+
+[Wiki part](https://github.com/rlggut/Labratorys/wiki#lab-testmaker-pascalpython)
