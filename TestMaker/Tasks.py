@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from Common import *
+import random
+import re
 class Task(ABC):
     def __init__(self):
         self.num=0
@@ -65,3 +67,28 @@ class Task_t2_2(Task):
         x = (x % 119) + (self.num % 7) + 3;
         self.question = 'Переведите число ' + from10(x, pow(y1, y2)) + ' из ' + str(pow(y1, y2)) + '-ричной в ' + str(y1)
         self.answ = from10(x, y1);
+
+class Task_t3(Task):
+    def _Base__createTask(self):
+        base=["A","0","!A","1","!B","A & B","!A & B","A & !B","!A & !B","A || B","!A || B","A || !B","!A || !B"]
+        dct={'A': "(A & (A || B))", 'B': "(B || (A & B)", "1": "(A || !A)", "0": "(B & !B)"}
+        st=base[self.num % len(base)]
+        self.answ = st
+        iterations=(self.num*self.num)%3 + 3
+        random.seed(self.num)
+        for i in range(iterations):
+            find=False
+            dctKey=""
+            while not find:
+                dctPoint=random.randint(0,len(dct)-1)
+                for var in dct:
+                    if(dctPoint==0):
+                        dctKey=var
+                        break
+                    dctPoint-=1
+                rt=re.search(dctKey, st)
+                if(rt != None):
+                    find=True
+            st=st.replace(dctKey,dct.get(dctKey),1)
+        st="Сократите выражение: "+st
+        self.question = st
