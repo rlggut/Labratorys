@@ -6,24 +6,27 @@ import re
 from Variants import *
 import datetime
 from calendar import monthrange
+#pip install python-docx
+#https://python-docx.readthedocs.io/en/latest/
+import docx
 
 class App:
     def __init__(self):
         self.window = Tk()
         self.window.title("Making class/home work")
-        size="400x200"
+        size="520x160"
         self.window.geometry(size)
         self.frame = Frame(self.window)
         self.frame.grid()
         self.variant=Variant()
 
         self.lblTypeOfWork = Label(self.frame, text="Choose type of work")
-        self.lblTypeOfWork.grid(column=1, row=0, padx=10)
+        self.lblTypeOfWork.grid(column=0, row=0, padx=10)
         self.varTypeWork = IntVar()
         self.radioClass = Radiobutton(self.frame, text="Classwork", variable=self.varTypeWork, value=2, command=self.__saveFileDir)
-        self.radioClass.grid(column=2, row=0)
+        self.radioClass.grid(column=1, row=0)
         self.radioHome = Radiobutton(self.frame, text="Homework", variable=self.varTypeWork, value=1, command=self.__saveFileDir)
-        self.radioHome.grid(column=3, row=0)
+        self.radioHome.grid(column=2, row=0)
         self.radioClass.select()
 
         now = datetime.datetime.now()
@@ -43,26 +46,25 @@ class App:
         self.yearSpin = ttk.Spinbox(self.lblDataSelect , from_=now.year, to_=now.year+10, width=5, command=self.__correctData)
         self.yearSpin.set(now.year)
         self.yearSpin.grid(column=5, row=0)
-        self.lblDataSelect.grid(column=1, row=1, columnspan=5, padx=10)
+        self.lblDataSelect.grid(column=0, row=1, columnspan=5, padx=10)
 
         self.filenameDir="C:"
         self.lblSave = Label(self.frame, text="Where to save")
-        self.lblSave.grid(column=1, row=2, padx=10)
+        self.lblSave.grid(column=0, row=2, padx=10)
         self.btnDirSave = Button(self.frame, text="...", command=self.__clickedSaving)
-        self.btnDirSave.grid(column=2, row=2)
+        self.btnDirSave.grid(column=1, row=2)
         self.lblSaveFile = Label(self.frame, text="Will be saved as...")
-        self.lblSaveFile.grid(column=1, row=3, columnspan=7, padx=10)
+        self.lblSaveFile.grid(column=0, row=3, columnspan=7, padx=10)
         self.__saveFileDir()
 
         self.lblVariant = Label(self.frame, text="Choose key:")
-        self.lblVariant.grid(column=1, row=4, padx=10)
+        self.lblVariant.grid(column=1, row=5, padx=10)
         self.entryKey = Entry(self.frame)
-        self.entryKey.grid(column=2, row=4)
+        self.entryKey.grid(column=2, row=5)
         self.entryKey.insert(0,now.strftime("%A")+str(now.day)+str(now.month)+str(now.year%100))
-        #self.btnSaveKey = Button(self.frame, text="Set key", command=self.__SetVariantKey)
-        #self.btnSaveKey.grid(column=3, row=4)
+        self.variantKey = 0
 
-        self.lblSaveTypeSelect = LabelFrame(self.frame, text='Create&Save', labelanchor=N)
+        self.lblSaveTypeSelect = LabelFrame(self.frame, text='Which type', labelanchor=N)
         self.varSaveWork = IntVar()
         self.checkWorkSave = Checkbutton(self.lblSaveTypeSelect, text='Work', variable=self.varSaveWork)
         self.varSaveWork.set(1)
@@ -71,10 +73,21 @@ class App:
         self.checkAnswerSave = Checkbutton(self.lblSaveTypeSelect, text='Answer', variable=self.varSaveAnswer)
         self.varSaveAnswer.set(1)
         self.checkAnswerSave.grid(column=1, row=0)
-        self.lblSaveTypeSelect.grid(column=1, row=5, columnspan=1, padx=10)
+        self.lblSaveTypeSelect.grid(column=0, row=5, padx=10)
 
         self.btnSave = Button(self.frame, text="Create&Save", command=self.__SavingVariant)
-        self.btnSave.grid(column=2, row=5)
+        self.btnSave.grid(column=7, row=5)
+
+        self.lblTasks=[]
+        self.SpinTasks=[]
+        self.lblNumsTasks = LabelFrame(self.frame, text='Tasks numbers', labelanchor=N)
+        for i in range(self.variant.getCatNumbers()):
+            self.lblTasks.append(Label(self.lblNumsTasks, text=str(i+1)+" cat:"))
+            self.lblTasks[i].grid(column=0, row=i, padx=10)
+            self.SpinTasks.append(ttk.Spinbox(self.lblNumsTasks , from_=0, to_=3, width=5))
+            self.SpinTasks[i].set(1)
+            self.SpinTasks[i].grid(column=1, row=i, padx=10)
+        self.lblNumsTasks.grid(column=7, row=0, rowspan=self.variant.getCatNumbers(), padx=10)
 
         self.window.mainloop()
     def __SetVariantKey(self):
@@ -84,30 +97,53 @@ class App:
                 ch='0'
             keyNum=(keyNum*10+ord(ch)-ord('0'))
             keyNum=keyNum % 1000000
+        self.variantKey=keyNum
         self.variant.setVariantNum(keyNum)
     def __SavingVariant(self):
         self.__SetVariantKey()
-        footer=""
+        typeOfWork=""
         if(self.varTypeWork.get()==1):
-            footer = "Домашняя работа "
+            typeOfWork = "Домашняя работа "
         else:
-            footer = "Классная работа "
-        footer = footer+"              "+self.daySpin.get()+"/"+self.monthSpin.get()+"/"+str(int(self.yearSpin.get())%100)
+            typeOfWork = "Классная работа "
 
+        docA = docx.Document()
+        docW = docx.Document()
         if(self.varSaveWork.get()):
-            fopen = open(self.filenameDir+"/"+self.filenameSave, 'w')
-            fopen.write(footer+"\n")
-            fopen.write(self.variant.getAllCategoriesQuestions())
-            fopen.close()
+            section = docW.sections[0]
+            header = section.header
+            paragraph = header.paragraphs[0]
+            paragraph.text = typeOfWork+"\t\t"+self.daySpin.get()+"/"+self.monthSpin.get()+"/"+str(int(self.yearSpin.get())%100)
+            paragraph.style = docW.styles["Header"]
+            foot = section.footer.paragraphs[0]
+            foot.text = "\t\t" + str(self.variantKey)
+            foot.style = docA.styles["Footer"]
+        if (self.varSaveAnswer.get()):
+            section = docA.sections[0]
+            header = section.header
+            paragraph = header.paragraphs[0]
+            paragraph.text = typeOfWork + "\t\t" + self.daySpin.get() + "/" + self.monthSpin.get() + "/" + str(
+                int(self.yearSpin.get()) % 100)
+            paragraph.style = docA.styles["Header"]
+            foot = section.footer.paragraphs[0]
+            foot.text = "\t\t" + str(self.variantKey)
+            foot.style = docA.styles["Footer"]
 
-        asnswFileName = self.filenameSave
-        asnswFileName = asnswFileName.rstrip('.doc')
-        asnswFileName = asnswFileName+"_answer.doc"
-        if(self.varSaveAnswer.get()):
-            fopen = open(self.filenameDir+"/"+asnswFileName, 'w')
-            fopen.write(footer+"\n")
-            fopen.write(self.variant.getAllCategoriesQuestions())
-            fopen.close()
+        for i in range(self.variant.getCatNumbers()):
+            for j in range(int(self.SpinTasks[i].get())):
+                self.variant.setVariantNum(self.variantKey+j)
+                if (self.varSaveWork.get()):
+                    docW.add_paragraph(self.variant.getQuestion(i+1), style='List Number')
+                if (self.varSaveAnswer.get()):
+                    docA.add_paragraph(self.variant.getAnswer(i+1), style='List Number')
+
+        if (self.varSaveWork.get()):
+            docW.save(self.filenameDir+"/"+self.filenameSave)
+        if (self.varSaveAnswer.get()):
+            asnswFileName = self.filenameSave
+            asnswFileName = asnswFileName.rstrip('.doc')
+            asnswFileName = asnswFileName + "_answer.doc"
+            docA.save(self.filenameDir+"/"+asnswFileName)
 
     def __saveFileDir(self):
         self.filenameSave=""
@@ -117,7 +153,7 @@ class App:
             self.filenameSave = "Classwork "
         self.filenameSave = self.filenameSave+"("+self.daySpin.get()+"_"+self.monthSpin.get()+"_"+self.yearSpin.get() + ").doc"
         place=self.filenameDir +"/"+ self.filenameSave
-        countMax=45
+        countMax=40
         if(len(place)>countMax):
             place = self.filenameDir[:(countMax-len(self.filenameSave))]
             place = place + ".../" + self.filenameSave

@@ -71,7 +71,7 @@ class Task_t2_2(Task):
 class Task_t3(Task):
     def _Base__createTask(self):
         base=["A","0","!A","1","!B","A & B","!A & B","A & !B","!A & !B","A || B","!A || B","A || !B","!A || !B"]
-        dct={'A': "(A & (A || B))", 'B': "(B || (A & B)", "1": "(A || !A)", "0": "(B & !B)"}
+        dct={'A': "(A & (A || B))", 'B': "(B || (A & B))", "1": "(A || !A)", "0": "(B & !B)"}
         st=base[self.num % len(base)]
         self.answ = st
         iterations=(self.num*self.num)%3 + 3
