@@ -6,16 +6,26 @@ class Task(ABC):
     def __init__(self):
         self.num=0
         self._Base__createTask()
+        self.lang="Ru"
     @abstractmethod
     def _Base__createTask(self):
         pass
+
+    def setLang(self, lg):
+        self.lang = lg
+    def getLang(self):
+        return self.lang
     def setVariant(self,num):
         self.num=num
         self._Base__createTask()
     def getQuestion(self):
-        return self.question
+        if(self.lang=="Ru"):
+            return self.question
+        else:
+            return self.questionE
     def getAnswer(self):
         return self.answ
+
 class Task_t1_1(Task):
     def _Base__createTask(self):
         x = (self.num % 23) + 11
@@ -23,6 +33,7 @@ class Task_t1_1(Task):
         x = (x % 31) + 17
         y = (self.num % 5) + 4
         self.question = 'Переведите число ' + str(x) + ' из десятичной в ' + str(y) + '-ричную'
+        self.questionE = 'Translate number ' + str(x) + ' from decimal to ' + str(y) + 'th'
         self.answ = from10(x, y)
 
 class Task_t1_2(Task):
@@ -32,6 +43,7 @@ class Task_t1_2(Task):
         x=(x % 43) +19
         y=(self.num % 7)+3
         self.question='Переведите число '+from10(x,y)+' из '+ str(y)+'-ричной в десятичную'
+        self.questionE='Translate the number '+from10(x,y)+' from '+ str(y)+'th to decimal'
         self.answ=str(x)
 class Task_t2_1(Task):
     def _Base__createTask(self):
@@ -52,6 +64,7 @@ class Task_t2_1(Task):
         else:
             x=x-239
         self.question='Переведите число '+from10(x,y1)+' из '+ str(y1)+'-ричной в '+str((pow(y1,y2)))
+        self.questionE = 'Translate number ' + from10(x, y1) + ' from ' + str(y1) + 'th to ' + str((pow(y1, y2)))
         self.answ=from10(x,(pow(y1,y2)))
 
 class Task_t2_2(Task):
@@ -66,6 +79,7 @@ class Task_t2_2(Task):
         x = x * x
         x = (x % 119) + (self.num % 7) + 3;
         self.question = 'Переведите число ' + from10(x, pow(y1, y2)) + ' из ' + str(pow(y1, y2)) + '-ричной в ' + str(y1)
+        self.questionE = 'Translate number ' + from10(x, pow(y1, y2)) + ' from ' + str(pow(y1, y2)) + 'th to ' + str(y1)
         self.answ = from10(x, y1);
 
 class Task_t3(Task):
@@ -90,5 +104,5 @@ class Task_t3(Task):
                 if(rt != None):
                     find=True
             st=st.replace(dctKey,dct.get(dctKey),1)
-        st="Сократите выражение: "+st
-        self.question = st
+        self.question = "Сократите выражение: "+st
+        self.questionE = "Shorten the expression: "+st
