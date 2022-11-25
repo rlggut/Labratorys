@@ -19,6 +19,11 @@ class App:
         self.frame = Frame(self.window)
         self.frame.grid()
         self.variant=Variant()
+        img1 = Image.open("ico/Rus.jpg")
+        self.IcoRus = ImageTk.PhotoImage(img1)
+        img2 = Image.open("ico/Eng.jpg")
+        self.IcoEng = ImageTk.PhotoImage(img2)
+        self.lang="Eng"
 
         self.lblTypeOfWork = Label(self.frame, text="Choose type of work")
         self.lblTypeOfWork.grid(column=0, row=0, padx=10)
@@ -75,6 +80,8 @@ class App:
         self.checkAnswerSave.grid(column=1, row=0)
         self.lblSaveTypeSelect.grid(column=0, row=5, padx=10)
 
+        self.btnLang = Button(self.frame, image=self.IcoEng, command=self.__ChangeLang)
+        self.btnLang.grid(column=6, row=5)
         self.btnSave = Button(self.frame, text="Create&Save", command=self.__SavingVariant)
         self.btnSave.grid(column=7, row=5)
 
@@ -99,6 +106,37 @@ class App:
             keyNum=keyNum % 1000000
         self.variantKey=keyNum
         self.variant.setVariantNum(keyNum)
+
+    def __ChangeLang(self):
+        if(self.lang=="Eng"):
+            self.lang="Rus"
+            self.btnLang.configure(image=self.IcoRus)
+            self.lblTypeOfWork["text"] = "Выберите тип работы"
+            self.lblNumsTasks["text"]='Задач по темам'
+            self.radioClass['text'] = "Классная работа"
+            self.radioHome['text'] = "Домашнаяя работа"
+            self.lblDataSelect['text'] = 'Выбор даты работы'
+            self.lblSave['text']="Куда сохранить"
+            self.lblVariant['text'] ="Ключ генерации:"
+            self.lblSaveTypeSelect['text'] = 'Сохранить'
+            self.checkWorkSave['text'] = 'Работу'
+            self.checkAnswerSave['text'] = 'Ответы'
+            self.btnSave['text']="Создать+Сохранить"
+        else:
+            self.lang="Eng"
+            self.btnLang.configure(image=self.IcoEng)
+            self.lblTypeOfWork["text"] = "Choose type of work"
+            self.lblNumsTasks["text"]='Tasks numbers'
+            self.radioClass['text']="Classwork"
+            self.radioHome['text']="Homework"
+            self.lblDataSelect['text']='Data selection'
+            self.lblSave['text']="Where to save"
+            self.lblVariant['text'] ="Choose key:"
+            self.lblSaveTypeSelect['text'] = 'Which type'
+            self.checkWorkSave['text'] = 'Work'
+            self.checkAnswerSave['text'] = 'Answer'
+            self.btnSave['text']="Create&Save"
+        self.__saveFileDir()
     def __SavingVariant(self):
         self.__SetVariantKey()
         typeOfWork=""
@@ -157,7 +195,10 @@ class App:
         if(len(place)>countMax):
             place = self.filenameDir[:(countMax-len(self.filenameSave))]
             place = place + ".../" + self.filenameSave
-        self.lblSaveFile["text"]="Will be saved as: "+place
+        if(self.lang=="Eng"):
+            self.lblSaveFile["text"]="Will be saved as: "+place
+        else:
+            self.lblSaveFile["text"] = "Будет сохранено как: " + place
 
     def __correctData(self):
         days = monthrange(int(self.yearSpin.get()), int(self.monthSpin.get()))[1]
