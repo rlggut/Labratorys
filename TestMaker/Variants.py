@@ -5,13 +5,21 @@ class Variant():
     def __init__(self):
         self.n = 4
         self.categories=["Number systems, direct translation", "Number systems, intersystem translation","Logical expressions"]
+        self.categoriesRus=["Системы счисления, прямой перевод", "Системы счисления, межсистемный перевод","Логические высказывания"]
         self.task1_1=Task_t1_1()
         self.task1_2=Task_t1_2()
         self.task2_1=Task_t2_1()
         self.task2_2=Task_t2_2()
         self.task3=Task_t3()
         self.taskCat=[[self.task1_1,self.task1_2],[self.task2_1,self.task2_2],[self.task3]]
-
+    def getAllCategoriesName(self):
+        return self.categories
+    def getAllCategoriesNameRus(self):
+        return self.categoriesRus
+    def setVariantLang(self,lang):
+        for tsk in self.taskCat:
+            for task in tsk:
+                task.setLang(lang)
     def getAllCategoriesQuestions(self):
         st = ""
         number = 1
