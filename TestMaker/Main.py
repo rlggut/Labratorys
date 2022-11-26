@@ -23,7 +23,7 @@ class App:
         self.IcoRus = ImageTk.PhotoImage(img1)
         img2 = Image.open("ico/Eng.jpg")
         self.IcoEng = ImageTk.PhotoImage(img2)
-        self.lang="Eng"
+        self.lang="En"
 
         self.lblTypeOfWork = Label(self.frame, text="Choose type of work")
         self.lblTypeOfWork.grid(column=0, row=0, padx=10)
@@ -96,6 +96,7 @@ class App:
             self.SpinTasks[i].grid(column=1, row=i, padx=10)
         self.lblNumsTasks.grid(column=7, row=0, rowspan=self.variant.getCatNumbers(), padx=10)
 
+        self.__ChangeLang()
         self.window.mainloop()
     def __SetVariantKey(self):
         keyNum=0
@@ -106,10 +107,11 @@ class App:
             keyNum=keyNum % 1000000
         self.variantKey=keyNum
         self.variant.setVariantNum(keyNum)
+        self.variant.setVariantLang(self.lang)
 
     def __ChangeLang(self):
-        if(self.lang=="Eng"):
-            self.lang="Rus"
+        if(self.lang=="En"):
+            self.lang="Ru"
             self.btnLang.configure(image=self.IcoRus)
             self.lblTypeOfWork["text"] = "Выберите тип работы"
             self.lblNumsTasks["text"]='Задач по темам'
@@ -123,7 +125,7 @@ class App:
             self.checkAnswerSave['text'] = 'Ответы'
             self.btnSave['text']="Создать+Сохранить"
         else:
-            self.lang="Eng"
+            self.lang="En"
             self.btnLang.configure(image=self.IcoEng)
             self.lblTypeOfWork["text"] = "Choose type of work"
             self.lblNumsTasks["text"]='Tasks numbers'
@@ -195,7 +197,7 @@ class App:
         if(len(place)>countMax):
             place = self.filenameDir[:(countMax-len(self.filenameSave))]
             place = place + ".../" + self.filenameSave
-        if(self.lang=="Eng"):
+        if(self.lang=="En"):
             self.lblSaveFile["text"]="Will be saved as: "+place
         else:
             self.lblSaveFile["text"] = "Будет сохранено как: " + place
