@@ -3,15 +3,17 @@ from Tasks import *
 
 class Variant():
     def __init__(self):
-        self.n = 4
-        self.categories=["Number systems, direct translation", "Number systems, intersystem translation","Logical expressions"]
-        self.categoriesRus=["Системы счисления, прямой перевод", "Системы счисления, межсистемный перевод","Логические высказывания"]
+        self.categories=["Number systems, direct translation", "Number systems, intersystem translation",
+                         "Logical expressions","Path finder"]
+        self.categoriesRus=["Системы счисления, прямой перевод", "Системы счисления, межсистемный перевод",
+            "Логические высказывания","Поиск путей"]
         self.task1_1=Task_t1_1()
         self.task1_2=Task_t1_2()
         self.task2_1=Task_t2_1()
         self.task2_2=Task_t2_2()
         self.task3=Task_t3()
-        self.taskCat=[[self.task1_1,self.task1_2],[self.task2_1,self.task2_2],[self.task3]]
+        self.task4=Task_t4()
+        self.taskCat=[[self.task1_1,self.task1_2],[self.task2_1,self.task2_2],[self.task3],[self.task4]]
     def getAllCategoriesName(self):
         return self.categories
     def getAllCategoriesNameRus(self):
@@ -24,16 +26,14 @@ class Variant():
         st = ""
         number = 1
         for tsk in self.taskCat:
-            num=self.n%len(tsk)
-            st = st + '№' + str(number) + '. ' + tsk[num].getQuestion() + "\n"
+            st = st + '№' + str(number) + '. ' + tsk[0].getQuestion() + "\n"
             number += 1
         return (st)
     def getAllCategoriesAnswers(self):
         st = ""
         number = 1
         for tsk in self.taskCat:
-            num=self.n%len(tsk)
-            st = st + '№' + str(number) + '. ' + tsk[num].getAnswer() + "\n"
+            st = st + '№' + str(number) + '. ' + tsk[0].getAnswer() + "\n"
             number += 1
         return (st)
     def getAllQuestions(self):
@@ -58,6 +58,31 @@ class Variant():
         if(num>len(self.taskCat[cat-1]))or(num<=0):
             return
         return self.taskCat[cat-1][num-1].getQuestion()
+    def getQuestionFlags(self, cat=1, num=1):
+        if(cat>len(self.taskCat))or(cat<=0):
+            return
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
+            return
+        return self.taskCat[cat-1][num-1].getFlags()
+    def getQuestionTable(self,cat=1, num=1):
+        if(cat>len(self.taskCat))or(cat<=0):
+            return
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
+            return
+        return self.taskCat[cat-1][num-1].getTable()
+    def getQuestionTableSizeN(self,cat=1, num=1):
+        if(cat>len(self.taskCat))or(cat<=0):
+            return
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
+            return
+        return self.taskCat[cat-1][num-1].getTableN()
+    def getQuestionTableSizeM(self,cat=1, num=1):
+        if(cat>len(self.taskCat))or(cat<=0):
+            return
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
+            return
+        return self.taskCat[cat-1][num-1].getTableM()
+
     def getAnswer(self, cat=1, num=1):
         if(cat>len(self.taskCat))or(cat<=0):
             return
@@ -68,8 +93,6 @@ class Variant():
         for tsk in self.taskCat:
             for task in tsk:
                 task.setVariant(num)
-    def getTaskNumbers(self):
-        return self.n
     def getCatNumbers(self):
         return len(self.categories)
     def getNumbersInCat(self, num):

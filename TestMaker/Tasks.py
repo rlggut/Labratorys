@@ -7,6 +7,14 @@ class Task(ABC):
         self.num=0
         self._Base__createTask()
         self.lang="Ru"
+        self.question = "Que?"
+        self.questionE = "Que?"
+        self.answ = "!"
+        #0-without add material, 1- table, 2- pic
+        self.flags=0
+        self.table=[]
+        self.tableN=0
+        self.tableM=0
     @abstractmethod
     def _Base__createTask(self):
         pass
@@ -25,6 +33,17 @@ class Task(ABC):
             return self.questionE
     def getAnswer(self):
         return self.answ
+    def getTable(self):
+        if (self.flags & 0x01 > 0):
+            return self.table
+        else:
+            return
+    def getTableN(self):
+        return self.tableN
+    def getTableM(self):
+        return self.tableM
+    def getFlags(self):
+        return self.flags
 
 class Task_t1_1(Task):
     def _Base__createTask(self):
@@ -106,3 +125,79 @@ class Task_t3(Task):
             st=st.replace(dctKey,dct.get(dctKey),1)
         self.question = "Сократите выражение: "+st
         self.questionE = "Shorten the expression: "+st
+
+def wayPoint(tbl, size):
+    ways=[]
+    posWays=[]
+    for i in range(size):
+        posWays.append(-1)
+        ways.append(-1)
+    ways[0]=0
+    posWays[0]=0
+    find=True
+    y=0
+    while(find):
+        for x in range(size):
+            if(ways[x]==-1)and(tbl[y][x]>0)and((ways[y]+tbl[y][x]<posWays[x])or(posWays[x]==-1)):
+                posWays[x]=ways[y]+tbl[x][y]
+        mxInd=-1
+        mx=-1
+        find=False
+        for i in range(size):
+            if((posWays[i]>=0)and(ways[i]==-1)):
+                find=True
+                if(mxInd==-1)or(mx>posWays[i]):
+                    mx=posWays[i]
+                    mxInd=i
+        if(find):
+            ways[mxInd]=mx
+            y=mxInd
+    return(ways[size-1])
+
+class Task_t4(Task):
+    def _Base__createTask(self):
+        self.answ = 0
+        size = ((self.num % 7) + 11)// 2
+        self.question = "Найдите кратчайший путь из вершины A в вершину "+chr(size+ord('A')-1)
+        self.questionE = "Find the shortest path from vertex A to vertex "+chr(size+ord('A')-1)
+        tp = (self.num % 101) + 87
+        self.flags = 1
+        self.tableN = size+1
+        self.tableM = size+1
+        tbl=[]
+        for i in range(size):
+            tbl.append([])
+            for j in range(size):
+                tbl[i].append(0)
+        i = 0
+        while (wayPoint(tbl, size)==-1) or (i < (3 * size)):
+            x = (tp + ((self.num * i)% 5) + random.randint(0,size)) %  size
+            y = (tp + ((self.num * i)% 7) + random.randint(0,size))% size
+            if (x==y):
+                y = (y+1)%size
+            dl = (tp % 7) + (tp % 3) + 1
+            if (((x + size - 2) % size > (size-4)) and (x==(size-1)) or ((x+size-2) % size > (size-4))
+                and (y==(size-1))) and (dl < 7):
+                dl = dl + 7
+            if (dl==0):
+                dl = 1
+            tbl[x][y] = dl
+            tbl[y][x] = dl
+            tp = tp + 13
+            if (wayPoint(tbl, size) != -1):
+                i = i+1
+        self.answ = str(wayPoint(tbl, size))
+
+        self.table = []
+        self.table.append([])
+        self.table[0].append('')
+        for i in range(size):
+            self.table[0].append(chr(ord('A') + i))
+        for y in range(size):
+            self.table.append([])
+            self.table[y+1].append(chr(ord('A')+y))
+            for x in range(size):
+                if(tbl[x][y]>0):
+                    self.table[y+1].append(str(tbl[x][y]))
+                else:
+                    self.table[y+1].append('')

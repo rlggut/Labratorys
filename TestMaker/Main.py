@@ -154,6 +154,7 @@ class App:
 
         docA = docx.Document()
         docW = docx.Document()
+        tables=[]
         if(self.varSaveWork.get()):
             section = docW.sections[0]
             header = section.header
@@ -179,6 +180,16 @@ class App:
                 self.variant.setVariantNum(self.variantKey+j)
                 if (self.varSaveWork.get()):
                     docW.add_paragraph(self.variant.getQuestion(i+1), style='List Number')
+                if(self.variant.getQuestionFlags(i+1)&0x1):
+                    n = self.variant.getQuestionTableSizeN(i+1)
+                    m = self.variant.getQuestionTableSizeM(i+1)
+                    tables.append(docW.add_table(rows=0, cols=m))
+                    tbl=self.variant.getQuestionTable(i+1)
+                    for y in range(n):
+                        row = tables[len(tables)-1].add_row().cells
+                        for x in range(m):
+                            row[x].text = tbl[y][x]
+                    tables[len(tables)-1].style ='Table Grid'
                 if (self.varSaveAnswer.get()):
                     docA.add_paragraph(self.variant.getAnswer(i+1), style='List Number')
 
