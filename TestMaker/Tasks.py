@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from Common import *
 import random
 import re
+import math
+from PIL import Image, ImageDraw
 class Task(ABC):
     def __init__(self):
         self.num=0
@@ -42,6 +44,11 @@ class Task(ABC):
         return self.tableN
     def getTableM(self):
         return self.tableM
+    def getPic(self):
+        if (self.flags & 0x02 > 0):
+            return self.canvas
+        else:
+            return
     def getFlags(self):
         return self.flags
 
@@ -201,3 +208,163 @@ class Task_t4(Task):
                     self.table[y+1].append(str(tbl[x][y]))
                 else:
                     self.table[y+1].append('')
+
+class Task_t5(Task):
+    def _Base__createTask(self):
+        dx=80
+        nums=(self.num%7)+11
+        points=[]
+        means=[]
+        for i in range(nums):
+            points.append([])
+            points[i].append(0)
+            points[i].append(0)
+            means.append(0)
+        means[0]=1
+        self.question='Сколькими способами можно пройти из вершины "A" в вершину "'+chr(ord('A')+nums-1)+'"'
+        tiers=0
+        if ((nums-2)% 3!=0):
+            tiers=((nums-2)//3)+3
+        else:
+            tiers=((nums-2)//3)+2
+        places=[]
+        connected=[]
+        for i in range(tiers):
+            places.append([])
+            connected.append([])
+            for j in range(3):
+                places[i].append(-1)
+                connected[i].append(False)
+        places[0][0]=-1
+        places[0][1]=0
+        places[0][2]=-1
+        places[tiers-1][0]=-1
+        places[tiers-1][1]=nums-1
+        places[tiers-1][2]=-1
+
+        self.canvas = Image.new("RGBA", (tiers*dx,150), (255,255,255,255))
+        draw = ImageDraw.Draw(self.canvas)
+        points[0][0]=15
+        points[0][1]=90
+        points[nums-1][0]=(dx//2)+(tiers-1)*dx
+        points[nums-1][1]=90
+
+        i=1;
+        tp=1;
+        while((nums-1)>i):
+            if((nums-1-i)>=3):
+                points[i][0]=random.randint(dx//4,(3*dx)//4)+dx*tp
+                points[i][1]=random.randint(7,23)
+                places[tp][0]=i
+                i=i+1
+                points[i][0]=random.randint(dx//4,(3*dx)//4)+dx*tp
+                points[i][1]=random.randint(7,23)+50
+                places[tp][1]=i
+                i=i+1
+                points[i][0]=random.randint(dx//4,(3*dx)//4)+dx*tp
+                points[i][1]=random.randint(7,23)+90
+                places[tp][2]=i
+                i=i+1
+                tp=tp+1
+            else:
+                if((nums-1-i)==2):
+                    points[i][0]=random.randint(dx//4,(3*dx)//4)+dx*tp
+                    points[i][1]=random.randint(7,23)
+                    places[tp][0]=i
+                    i=i+1
+                    points[i][0]=random.randint(dx//4,(3*dx)//4)+dx*tp
+                    points[i][1]=random.randint(7,23)+90
+                    places[tp][2]=i
+                    i=i+1
+                    places[tp][1]=-1
+                    tp=tp+1
+                else:
+                    points[i][0]=random.randint(dx//4,(3*dx)//4)+dx*(tiers-2)
+                    points[i][1]=random.randint(-7,23)+50
+                    i=i+1
+                    places[tiers-2][0]=-1
+                    places[tiers-2][1]=i-1
+                    places[tiers-2][2]=-1
+        for i in range(nums):
+            draw.ellipse((points[i][0]-3,points[i][1]-3,points[i][0]+3,points[i][1]+3), outline="black")
+            draw.text((points[i][0]-5,points[i][1]+6),text=str(chr(ord('A')+i)),fill='black')
+        connected[0][1]=True
+        for i in range(tiers-1):
+            for j in range(2):
+                if(places[i][j]!=-1):
+                    if(not connected[i][j]):
+                        lines=0
+                        if(j>0):
+                            if(places[i][j-1]!=-1):
+                                lines=lines+1
+                                means[places[i][j]]=means[places[i][j-1]]
+                                connected[i][j]=True
+                                x1=points[places[i][j-1]][0]
+                                y1=points[places[i][j-1]][1]
+                                x2=points[places[i][j]][0]
+                                y2=points[places[i][j]][1]
+                                draw.line((x1,y1,x2,y2),fill='black')
+                                x=x1-x2
+                                y=y1-y2
+                                a=math.pi - math.acos((x2-x1)/math.sqrt(x*x+y*y))
+                                x=(x1+7*x2)//8
+                                y=(y1+7*y2)//8
+                                draw.line((x+int((10*math.cos(a+math.pi/10))),
+                                                        y-int(10*math.sin(a+math.pi/10)),x,y),fill='black')
+                                draw.line((x+int(10*math.cos(a-math.pi/10)),
+                                             y-int(10*math.sin(a-math.pi/10)),x,y),fill='black')
+                    lines=0
+                    if(j>0):
+                        if(places[i+1][j-1]!=-1):
+                            lines=lines+1
+                            means[places[i+1][j-1]]=means[places[i+1][j-1]]+means[places[i][j]]
+                            connected[i+1][j-1]=True
+                            x1=points[places[i][j]][0]
+                            y1=points[places[i][j]][1]
+                            x2=points[places[i+1][j-1]][0]
+                            y2=points[places[i+1][j-1]][1]
+                            draw.line((x1,y1,x2,y2),fill='black')
+                            x=x1-x2
+                            y=y1-y2
+                            a=math.pi - math.asin((y2-y1)/math.sqrt(x*x+y*y))
+                            x=(x1+7*x2)//8
+                            y=(y1+7*y2)//8
+                            draw.line((x+int(10*math.cos(a+math.pi/10)),y-int(10*math.sin(a+math.pi/10)),x,y),fill='black')
+                            draw.line((x+int(10*math.cos(a-math.pi/10)),y-int(10*math.sin(a-math.pi/10)),x,y),fill='black')
+                    if(places[i+1][j]!=-1):
+                        if(lines==0)or(i % 2==0):
+                            lines=lines+1
+                            means[places[i+1][j]]=means[places[i+1][j]]+means[places[i][j]];
+                            connected[i+1][j]=True
+                            x1=points[places[i][j]][0]
+                            y1=points[places[i][j]][1]
+                            x2=points[places[i+1][j]][0]
+                            y2=points[places[i+1][j]][1]
+                            draw.line((x1,y1,x2,y2),fill='black')
+                            x=x1-x2
+                            y=y1-y2
+                            a=math.pi - math.asin((y2-y1)/math.sqrt(x*x+y*y))
+                            x=(x1+7*x2)//8
+                            y=(y1+7*y2)//8
+                            draw.line((x+int(10*math.cos(a+math.pi/10)),y-int(10*math.sin(a+math.pi/10)),x,y),fill='black')
+                            draw.line((x+int(10*math.cos(a-math.pi/10)),y-int(10*math.sin(a-math.pi/10)),x,y),fill='black')
+                    if(j<2):
+                        if(places[i+1][j+1]!=-1)and((lines==0)or(i % 2==0)):
+                            lines=lines+1
+                            means[places[i+1][j+1]]=means[places[i+1][j+1]]+means[places[i][j]]
+                            connected[i+1][j+1]=True
+                            x1=points[places[i][j]][0]
+                            y1=points[places[i][j]][1]
+                            x2=points[places[i+1][j+1]][0]
+                            y2=points[places[i+1][j+1]][1]
+                            draw.line((x1,y1,x2,y2),fill='black')
+                            x=x1-x2
+                            y=y1-y2
+                            a=math.pi - math.asin((y2-y1)/math.sqrt(x*x+y*y));
+                            x=(x1+7*x2)//8
+                            y=(y1+7*y2)//8
+                            draw.line((x+int(10*math.cos(a+math.pi/10)),y-int(10*math.sin(a+math.pi/10)),x,y),fill='black')
+                            draw.line((x+int(10*math.cos(a-math.pi/10)),y-int(10*math.sin(a-math.pi/10)),x,y),fill='black')
+        del draw
+        self.answ=str(means[nums-1])
+        self.flags=2

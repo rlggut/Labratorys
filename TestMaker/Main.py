@@ -2,10 +2,11 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk
-import re
 from Variants import *
 import datetime
 from calendar import monthrange
+import os
+from docx.shared import Inches
 #pip install python-docx
 #https://python-docx.readthedocs.io/en/latest/
 import docx
@@ -15,7 +16,7 @@ class App:
         self.variant=Variant()
         self.window = Tk()
         self.window.title("Making class/home work")
-        size="860x"+str(max(self.variant.getCatNumbers()*10,190))
+        size="860x"+str(max(self.variant.getCatNumbers()*10,210))
         self.window.geometry(size)
         self.frame = Frame(self.window)
         self.frame.grid()
@@ -190,6 +191,11 @@ class App:
                         for x in range(m):
                             row[x].text = tbl[y][x]
                     tables[len(tables)-1].style ='Table Grid'
+                if (self.variant.getQuestionFlags(i + 1) & 0x2):
+                    im=self.variant.getQuestionPic(i+1)
+                    im.save('1.png')
+                    docW.add_picture('1.png', width=Inches(7))
+                    os.remove('1.png')
                 if (self.varSaveAnswer.get()):
                     docA.add_paragraph(self.variant.getAnswer(i+1), style='List Number')
 

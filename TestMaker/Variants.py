@@ -4,16 +4,17 @@ from Tasks import *
 class Variant():
     def __init__(self):
         self.categories=["Number systems, direct translation", "Number systems, intersystem translation",
-                         "Logical expressions","Path finder"]
+                         "Logical expressions","Path finder","Counting the number of paths"]
         self.categoriesRus=["Системы счисления, прямой перевод", "Системы счисления, межсистемный перевод",
-            "Логические высказывания","Поиск путей"]
+            "Логические высказывания","Поиск путей","Подсчет количества путей"]
         self.task1_1=Task_t1_1()
         self.task1_2=Task_t1_2()
         self.task2_1=Task_t2_1()
         self.task2_2=Task_t2_2()
         self.task3=Task_t3()
         self.task4=Task_t4()
-        self.taskCat=[[self.task1_1,self.task1_2],[self.task2_1,self.task2_2],[self.task3],[self.task4]]
+        self.task5=Task_t5()
+        self.taskCat=[[self.task1_1,self.task1_2],[self.task2_1,self.task2_2],[self.task3],[self.task4],[self.task5]]
     def getAllCategoriesName(self):
         return self.categories
     def getAllCategoriesNameRus(self):
@@ -64,6 +65,12 @@ class Variant():
         if(num>len(self.taskCat[cat-1]))or(num<=0):
             return
         return self.taskCat[cat-1][num-1].getFlags()
+    def getQuestionPic(self,cat=1, num=1):
+        if(cat>len(self.taskCat))or(cat<=0):
+            return
+        if(num>len(self.taskCat[cat-1]))or(num<=0):
+            return
+        return self.taskCat[cat-1][num-1].getPic()
     def getQuestionTable(self,cat=1, num=1):
         if(cat>len(self.taskCat))or(cat<=0):
             return
