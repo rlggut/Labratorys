@@ -12,13 +12,14 @@ import docx
 
 class App:
     def __init__(self):
+        self.variant=Variant()
         self.window = Tk()
         self.window.title("Making class/home work")
-        size="520x160"
+        size="860x"+str(max(self.variant.getCatNumbers()*10,190))
         self.window.geometry(size)
         self.frame = Frame(self.window)
         self.frame.grid()
-        self.variant=Variant()
+
         img1 = Image.open("ico/Rus.jpg")
         self.IcoRus = ImageTk.PhotoImage(img1)
         img2 = Image.open("ico/Eng.jpg")
@@ -83,13 +84,13 @@ class App:
         self.btnLang = Button(self.frame, image=self.IcoEng, command=self.__ChangeLang)
         self.btnLang.grid(column=6, row=5)
         self.btnSave = Button(self.frame, text="Create&Save", command=self.__SavingVariant)
-        self.btnSave.grid(column=7, row=5)
+        self.btnSave.grid(column=2, row=6, columnspan=2)
 
         self.lblTasks=[]
         self.SpinTasks=[]
         self.lblNumsTasks = LabelFrame(self.frame, text='Tasks numbers', labelanchor=N)
         for i in range(self.variant.getCatNumbers()):
-            self.lblTasks.append(Label(self.lblNumsTasks, text=str(i+1)+" cat:"))
+            self.lblTasks.append(Label(self.lblNumsTasks, text=str(i+1)+" cat:", anchor=W))
             self.lblTasks[i].grid(column=0, row=i, padx=10)
             self.SpinTasks.append(ttk.Spinbox(self.lblNumsTasks , from_=0, to_=3, width=5))
             self.SpinTasks[i].set(1)
@@ -124,6 +125,8 @@ class App:
             self.checkWorkSave['text'] = 'Работу'
             self.checkAnswerSave['text'] = 'Ответы'
             self.btnSave['text']="Создать+Сохранить"
+            for i in range(self.variant.getCatNumbers()):
+                self.lblTasks[i]['text']=str(i + 1) + ". " +self.variant.getAllCategoriesNameRus()[i]+":"
         else:
             self.lang="En"
             self.btnLang.configure(image=self.IcoEng)
@@ -138,6 +141,8 @@ class App:
             self.checkWorkSave['text'] = 'Work'
             self.checkAnswerSave['text'] = 'Answer'
             self.btnSave['text']="Create&Save"
+            for i in range(self.variant.getCatNumbers()):
+                self.lblTasks[i]['text']=str(i + 1) + ". " +self.variant.getAllCategoriesName()[i]+":"
         self.__saveFileDir()
     def __SavingVariant(self):
         self.__SetVariantKey()
