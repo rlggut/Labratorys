@@ -3,3 +3,4 @@
 *.pyc
 .idea
 __pychache__
+.doc

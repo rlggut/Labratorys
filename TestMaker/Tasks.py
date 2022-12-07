@@ -290,7 +290,7 @@ class Task_t5(Task):
             draw.text((points[i][0]-5,points[i][1]+6),text=str(chr(ord('A')+i)),fill='black')
         connected[0][1]=True
         for i in range(tiers-1):
-            for j in range(2):
+            for j in range(3):
                 if(places[i][j]!=-1):
                     if(not connected[i][j]):
                         lines=0
