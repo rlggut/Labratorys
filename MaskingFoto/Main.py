@@ -2,7 +2,8 @@ from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk
 import sys
-sys.path.append('/Users/GRL/Desktop/Labratorys')
+import os
+sys.path.append(os.path.join(sys.path[0], '..'))
 from Matrix import *
 from ImageProcess import *
 import re
