@@ -1,17 +1,15 @@
 from tkinter import *
 import wave
-from PIL import Image, ImageDraw
-import numpy as np
+from PIL import Image, ImageDraw, ImageTk
 
 def pointFromBuff(buff, sampwidth):
     points=[]
     minusBit=(2**(8*sampwidth-1))
     for i in range(0,len(buff)-sampwidth,sampwidth):
         pt=0
-        for j in range(sampwidth):
-            pt=pt*256+buff[i+j]
+        pt=buff[i+1]*256+buff[i]
         if(pt>minusBit):
-            pt=(minusBit-pt)
+            pt=-(2*minusBit-pt)
         points.append(pt)
     return(points)
 
@@ -40,18 +38,24 @@ class App:
         print(self.nchannels, self.sampwidth, self.framerate, self.nframes)
 
     def __Draw(self):
+        sizeY=1024
+        step=1
         content = self.wav.readframes(min(3*self.framerate,self.nframes))
         samples = pointFromBuff(content, self.sampwidth)
-        image1 = Image.new("RGB", (len(samples), self.canvasH), "white")
+        image1 = Image.new("RGB", (len(samples)//step, sizeY), "white")
         draw = ImageDraw.Draw(image1)
         maxAmp=2**(self.sampwidth*8-1)
+        lastY=sizeY//2
         t=1
-        for i in range(len(samples)):
+        for i in range(0,len(samples),step):
             posY = samples[i]
-            posY = (posY*(self.canvasH//2))//maxAmp
-            if(posY>(self.canvasH//2)):
-                print(samples[i],maxAmp,posY,"H")
-            draw.ellipse([(t, -posY + (self.canvasH//2)), (t, -posY + (self.canvasH//2))], fill ="#ffff33", outline ="red")
+            #print(samples[i],content[2*i],content[2*i+1])
+            posY = (posY*(sizeY//2))//maxAmp
+            draw.line([(t-1, lastY), (t, -posY + sizeY//2)], fill =128,width=1)
+            lastY = -posY + (sizeY//2)
             t += 1
+        self.image = image1.resize((self.canvasW, self.canvasH))
+        self.photo = ImageTk.PhotoImage(self.image)
+        self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
         image1.save("res.png")
 app=App()
