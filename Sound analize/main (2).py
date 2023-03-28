@@ -1,6 +1,36 @@
 from tkinter import *
 import wave
 from PIL import Image, ImageDraw, ImageTk
+class Waveform():
+    def __init__(self, width=2000, height=400):
+        self._width = width
+        self._height = height
+        self._image = Image.new("RGB", (self._width, self._height), "white")
+    def setSignal(self, sig, sampwidth=2):
+        self._signal = sig
+        if(len(sig)!=self._width):
+            self._width = len(sig)
+            self._image = Image.new("RGB", (self._width, self._height), "white")
+        self.sampwidth = sampwidth
+
+        self.draw = ImageDraw.Draw(self._image)
+        self.draw.line([(0, self._height // 2), (len(self._signal), self._height // 2)], fill="green", width=1)
+        maxAmp = 2 ** (self.sampwidth * 8 - 1)
+        lastY = self._height // 2
+        t = 1
+        for i in range(len(self._signal)):
+            posY = self._signal[i]
+            posY = (posY * (self._height // 2)) // maxAmp
+            self.draw.line([(t - 1, lastY), (t, - posY + self._height // 2)], fill=128, width=1)
+            lastY = -posY + (self._height // 2)
+            t += 1
+        self.photo = ImageTk.PhotoImage(self._image)
+    def getPhoto(self):
+        return self.photo
+    def getImage(self):
+        return self._image
+    def saveImage(self, path="res.png"):
+        self._image.save(path)
 
 def pointFromBuff(buff, sampwidth):
     points=[]
@@ -56,27 +86,12 @@ class App:
         sizeY=1024
         step=1
 
-        image1 = Image.new("RGB", (len(self.samples)//step, sizeY), "white")
-        draw = ImageDraw.Draw(image1)
+        wave = Waveform(len(self.samples), sizeY)
+        wave.setSignal(self.samples,self.sampwidth)
 
-        draw.line([(0, sizeY//2), (len(self.samples)//step, sizeY // 2)], fill="green", width=1)
-        ind=1
-        while(ind*self.framerate<len(self.samples)):
-            draw.line([(ind*self.framerate, sizeY-sizeY//8), (ind*self.framerate, sizeY)], fill="blue", width=16)
-            ind += 1
-
-        maxAmp=2**(self.sampwidth*8-1)
-        lastY=sizeY//2
-        t=1
-        for i in range(0,len(self.samples),step):
-            posY = self.samples[i]
-            posY = (posY*(sizeY//2))//maxAmp
-            draw.line([(t-1, lastY), (t, -posY + sizeY//2)], fill =128,width=1)
-            lastY = -posY + (sizeY//2)
-            t += 1
-        self.image = image1.resize((self.canvasW, self.canvasH))
+        self.image = wave.getImage().resize((self.canvasW, self.canvasH))
         self.photo = ImageTk.PhotoImage(self.image)
         self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
-        image1.save("res.png")
+        wave.saveImage("res.png")
 
 app=App()
