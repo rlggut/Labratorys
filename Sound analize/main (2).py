@@ -1,17 +1,15 @@
 from tkinter import *
 import wave
+import math
 from PIL import Image, ImageDraw, ImageTk
 class Waveform():
-    def __init__(self, width=2000, height=400):
-        self._width = width
+    def __init__(self, height=400, sampwidth=2):
         self._height = height
-        self._image = Image.new("RGB", (self._width, self._height), "white")
-    def setSignal(self, sig, sampwidth=2):
-        self._signal = sig
-        if(len(sig)!=self._width):
-            self._width = len(sig)
-            self._image = Image.new("RGB", (self._width, self._height), "white")
         self.sampwidth = sampwidth
+    def setSignal(self, sig):
+        self._signal = sig
+        self._width = len(sig)
+        self._image = Image.new("RGB", (self._width, self._height), "white")
 
         self.draw = ImageDraw.Draw(self._image)
         self.draw.line([(0, self._height // 2), (len(self._signal), self._height // 2)], fill="green", width=1)
@@ -43,6 +41,40 @@ def pointFromBuff(buff, sampwidth):
         points.append(pt)
     return(points)
 
+class SignalWidget():
+    def __init__(self, framerate=8000, sampwidth=2, height=400, frameImages=4):
+        self._frameImage = frameImages
+        self._framerate = framerate
+        self._sampwidth = sampwidth
+        self._height = height
+        self._timePerImage = 100 #ms
+
+        self._haveImage = False
+    def setSignal(self, sig=[]):
+        self._haveImage = False
+        self._signal = sig
+        self._time = (len(sig)*1000) // self._framerate
+        self._signal = self._signal[:((self._time * self._framerate) // 1000)]
+        self._sizeForFrame = ((self._timePerImage * self._framerate) // 1000)
+        self._numsOfFrames = math.ceil(self._time // self._timePerImage)
+        self._images=[]
+        self._waves=[]
+        for i in range(self._numsOfFrames):
+            wave = Waveform(self._height, self._sampwidth)
+            wave.setSignal(self._signal[i*self._sizeForFrame
+                                        : min((i+1)*self._sizeForFrame,len(self._signal))])
+            self._waves.append(wave)
+            self._images.append(self._waves[i].getImage())
+    def getImage(self):
+        self._haveImage = True
+        self._image = Image.new("RGB", (self._sizeForFrame * self._frameImage, self._height), "white")
+        for i in range(self._frameImage):
+            self._image.paste(self._images[i],(i*((self._timePerImage * self._framerate) // 1000), 0))
+        return self._image
+    def saveImage(self, path="res.png"):
+        if not self._haveImage:
+            self.getImage()
+        self._image.save(path)
 class App:
     def __init__(self):
         self.window = Tk()
@@ -83,15 +115,20 @@ class App:
                     newSample.append(self.samples[i+j])
         self.samples = newSample
     def __Draw(self):
-        sizeY=1024
-        step=1
+        heigth = 1024
 
-        wave = Waveform(len(self.samples), sizeY)
-        wave.setSignal(self.samples,self.sampwidth)
+        #wave = Waveform(heigth, self.sampwidth)
+        #wave.setSignal(self.samples)
+        #self.image = wave.getImage().resize((self.canvasW, self.canvasH))
+        #wave.saveImage("res.png")
 
-        self.image = wave.getImage().resize((self.canvasW, self.canvasH))
+        wgt = SignalWidget(self.framerate, self.sampwidth, heigth)
+        wgt.setSignal(self.samples)
+        wgt.saveImage("res.png")
+        self.image = wgt.getImage().resize((self.canvasW, self.canvasH))
+
         self.photo = ImageTk.PhotoImage(self.image)
         self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
-        wave.saveImage("res.png")
+
 
 app=App()
