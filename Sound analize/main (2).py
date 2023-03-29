@@ -56,7 +56,7 @@ class App:
     def __Draw(self):
         heigth = 1024
 
-        wgt = signalwidget(self.framerate, self.sampwidth, heigth, 4)
+        wgt = signalwidget(self.framerate, self.sampwidth, heigth, 100, 4)
         wgt.setData(self.samples)
         wgt.saveImage("res.png")
         self.image = wgt.getImage().resize((self.canvasW, self.canvasH))

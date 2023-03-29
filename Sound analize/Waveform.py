@@ -12,9 +12,9 @@ class waveform():
         self.draw = ImageDraw.Draw(self._image)
         self.draw.line([(0, self._height // 2), (len(self._signal), self._height // 2)], fill="green", width=1)
         maxAmp = 2 ** (self.sampwidth * 8 - 1)
-        lastY = self._height // 2
+        lastY =  (self._height // 2) - self._signal[0]
         t = 1
-        for i in range(len(self._signal)):
+        for i in range(1,len(self._signal)):
             posY = self._signal[i]
             posY = (posY * (self._height // 2)) // maxAmp
             self.draw.line([(t - 1, lastY), (t, - posY + self._height // 2)], fill=128, width=1)
