@@ -28,6 +28,9 @@ class signalwidget():
             self._waves.append(wave)
             self._images.append(self._waves[i].getImage())
         self.getImage()
+    def setZoom(self, zoom):
+        self._frameImage = zoom
+        self._lastDue = (-1, 0)
 
     def getImage(self, frm=-1):
         if(frm == -1 and self._haveImage):
@@ -37,10 +40,9 @@ class signalwidget():
         frm = min(frm, self._numsOfFrames - self._frameImage)
         to = frm+self._frameImage
         if(self._lastDue != (frm,to)):
-            if(not self._haveImage):
-                self._image = Image.new("RGB", (self._sizeForFrame * self._frameImage, self._height), "white")
-            for i in range(self._frameImage):#frm, to):
-                self._image.paste(self._images[i], (i*((self._timePerImage * self._framerate) // 1000), 0))
+            self._image = Image.new("RGB", (self._sizeForFrame * self._frameImage, self._height), "white")
+            for i in range(frm, to):
+                self._image.paste(self._images[i], ((i-frm)*((self._timePerImage * self._framerate) // 1000), 0))
         self._haveImage = True
         self._lastDue=(frm,to)
         return self._image
