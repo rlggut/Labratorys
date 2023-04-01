@@ -1,7 +1,6 @@
 from tkinter import *
 import wave
 from SignalWidget import *
-from PIL import Image, ImageDraw, ImageTk
 from SpectrForm import *
 
 def pointFromBuff(buff, sampwidth):
