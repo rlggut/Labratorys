@@ -2,17 +2,7 @@ from tkinter import *
 import wave
 from SignalWidget import *
 from SpectrForm import *
-
-def pointFromBuff(buff, sampwidth):
-    points=[]
-    minusBit=(2**(8*sampwidth-1))
-    for i in range(0,len(buff)-sampwidth,sampwidth):
-        pt=buff[i+1]*256+buff[i]
-        if(pt>minusBit):
-            pt=-(2*minusBit-pt)
-        points.append(pt)
-    return(points)
-
+from soundCommon import *
 
 class App:
     def __init__(self):
@@ -94,7 +84,7 @@ class App:
         (self._nchannels, self.sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
         self.content = self.wav.readframes(min(self.researchTime * self._framerate, self._nframes))
         self.samples = pointFromBuff(self.content, self.sampwidth)
-        self.__deleteSilence()
+        self.samples = deleteSilence(self.samples, self._framerate,100,700)
 
         self._timePerImage = 50
         self._frameImage = 4
@@ -105,33 +95,19 @@ class App:
         self._signalWgt.setData(self.samples)
         self._from = 0
 
-        self._spectr = spectrofm(1024, 1)
-
-
-    def __deleteSilence(self):
-        pointForResearch = self.researchDelta * self._framerate // 1000
-        newSample=[]
-        for i in range(0,len(self.samples)-pointForResearch,pointForResearch):
-            power=0
-            for j in range(pointForResearch):
-                power+=abs(self.samples[i+j])
-            power /= pointForResearch
-            if(power>4*self.researchDelta):
-                for j in range(pointForResearch):
-                    newSample.append(self.samples[i+j])
-        self.samples = newSample
+        self._spectr = spectrofm(self.canvasH, 1, self.canvasH)
     def __Draw(self):
-        self._spectrData = FFTAnalysis(self.samples[(self._from)*self._sizeForFrame:
-                                                    (self._from+self._frameImage)*self._sizeForFrame])
-        self._spectr.setData(self._spectrData)
-        self._spectr.makeZone([0.1, 0.4, 0.3, 0.2])
-
         self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
-        self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
         self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
-        self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
         self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
 
+        self._spectrData = FFTAnalysis(self.samples[(self._from)*self._sizeForFrame:
+                                                    (self._from)*self._sizeForFrame+512])
+        self._spectr.setMaxAmpl(max(self._spectrData))
+        self._spectr.setData(self._spectrData)
+        self._spectr.makeZone([0.1, 0.4, 0.3, 0.2])
+        self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
+        self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
         self.с_imageSpctr = self.canvasSpectr.create_image(0, 0, anchor='nw', image=self.photoSpectr)
 
         tStart = self._from * self._timePerImage
