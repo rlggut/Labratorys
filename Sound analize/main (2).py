@@ -1,4 +1,6 @@
 from tkinter import *
+from tkinter import ttk
+from tkinter import filedialog
 import wave
 from SignalWidget import *
 from SpectrForm import *
@@ -13,7 +15,8 @@ class App:
         self.canvasH = 200
         self.researchTime = 3
         self.researchDelta=100
-        self.window.geometry("600x450")
+        self._furieCount = 512
+        self.window.geometry("600x500")
         self.frame = Frame(self.window)
         self.frame.grid()
 
@@ -21,28 +24,52 @@ class App:
         self.signal = signal()
         self.__getData()
 
-        self.canvasOscill = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
-        self.canvasOscill.grid(column=0, row=0, columnspan=5)
+        self.btnFileOrig = Button(self.frame, text="Выбрать файл", command=self.__clickedLoadingOrig)
+        self.btnFileOrig.grid(column=0, row=0)
+        self.lblChoosedOrig = Label(self.frame, text=self.filename)
+        self.lblChoosedOrig.grid(column=1, row=0, columnspan=4)
 
-        self.canvasSpectr = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
-        self.canvasSpectr.grid(column=0, row=2, columnspan=5)
+        self.canvasOscill = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
+        self.canvasOscill.grid(column=0, row=1, columnspan=5)
 
         self.btnLeft = Button(self.frame, text="<-", command=self.__moveOscillLeft, state=DISABLED)
-        self.btnLeft.grid(column=0, row=1)
+        self.btnLeft.grid(column=0, row=2)
         self.btnRight = Button(self.frame, text="->", command=self.__moveOscillRight)
-        self.btnRight.grid(column=4, row=1)
+        self.btnRight.grid(column=4, row=2)
 
         self.btnPlus = Button(self.frame, text="Zoom in(+)", command=self.__zoomIn)
-        self.btnPlus.grid(column=1, row=1)
+        self.btnPlus.grid(column=1, row=2)
         self.btnMinus = Button(self.frame, text="Zoom out(-)", command=self.__zoomOut)
-        self.btnMinus.grid(column=3, row=1)
+        self.btnMinus.grid(column=3, row=2)
 
         self.lblDurance = Label(self.frame, text=":")
-        self.lblDurance.grid(column=2, row=1)
+        self.lblDurance.grid(column=2, row=2)
+
+        self.canvasSpectr = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
+        self.canvasSpectr.grid(column=0, row=3, columnspan=5)
+
+        self.var = StringVar()
+        self.comboFurie = ttk.Combobox(self.frame, textvariable=self.var)
+        self.comboFurie['values'] = [128, 256, 512, 1024, 2048]
+        self.comboFurie.current(2)
+        self.comboFurie['state'] = 'readonly'
+        self.comboFurie.grid(column=0, row=4)
+        self.comboFurie.bind("<<ComboboxSelected>>", self.__changeFurieCount)
 
         self.__Draw()
         self.__correctButtons()
         self.window.mainloop()
+
+    def __changeFurieCount(self, event):
+        self._furieCount = int(self.comboFurie.get())
+        self.__Draw()
+    def __clickedLoadingOrig(self):
+        file = filedialog.askopenfilename(filetypes=[("SoundWave (wav)", ("*.wav"))])
+        if (file == ""):
+            return False
+        self.filename = file
+        self.lblChoosedOrig.configure(text=self.filename)
+        self.__getData()
 
     def __zoomOut(self):
         self._frameImage = (self._frameImage*2)
@@ -100,14 +127,19 @@ class App:
         self._spectr = spectrofm(self.canvasH, 1, self.canvasH)
     def __Draw(self):
         self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
+        draw = ImageDraw.Draw(self.imageOscill)
+        #self._framerate * self._timePerImage * self._frameImage <-> self.canvasW
+        furrTime = (self._furieCount * self.canvasW) /(self._framerate * self._timePerImage * self._frameImage)
+        draw.line([(0, self.canvasH), (furrTime, self.canvasH)], fill="blue", width=1)
+
         self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
         self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
 
-        self._spectrData = self.signal.getFutie((self._from)*self._sizeForFrame, (self._from)*self._sizeForFrame+512)
+        self._spectrData = self.signal.getFutie((self._from)*self._sizeForFrame, (self._from)*self._sizeForFrame+self._furieCount)
         if(len(self._spectrData)!=0):
             self._spectr.setMaxAmpl(max(self._spectrData))
             self._spectr.setData(self._spectrData)
-            self._spectr.drawAverZone([0.02, 0.4, 0.4, 0.18])
+            #self._spectr.drawAverZone([0.02, 0.4, 0.4, 0.18])
             self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
             self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
             self.с_imageSpctr = self.canvasSpectr.create_image(0, 0, anchor='nw', image=self.photoSpectr)
