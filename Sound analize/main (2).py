@@ -2,6 +2,7 @@ from tkinter import *
 import wave
 from SignalWidget import *
 from SpectrForm import *
+from Signals import *
 from soundCommon import *
 
 class App:
@@ -17,6 +18,7 @@ class App:
         self.frame.grid()
 
         self.filename = "sample.wav"
+        self.signal = signal()
         self.__getData()
 
         self.canvasOscill = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
@@ -83,16 +85,16 @@ class App:
         self.wav = wave.open(self.filename, mode="r")
         (self._nchannels, self.sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
         self.content = self.wav.readframes(min(self.researchTime * self._framerate, self._nframes))
-        self.samples = pointFromBuff(self.content, self.sampwidth)
-        self.samples = deleteSilence(self.samples, self._framerate,100,700)
+        self.signal = signal(pointFromBuff(self.content, self.sampwidth))
+        self.signal.deleteSilence(self._framerate*100, 700)
 
         self._timePerImage = 50
         self._frameImage = 4
         self._sizeForFrame = ((self._timePerImage * self._framerate) // 1000)
-        self._time = (len(self.samples)*1000) // self._framerate
+        self._time = (self.signal.getSize()*1000) // self._framerate
         self._numsOfFrames = math.ceil(self._time // self._timePerImage)
         self._signalWgt = signalwidget(self._framerate, self.sampwidth, 1024, self._timePerImage, self._frameImage)
-        self._signalWgt.setData(self.samples)
+        self._signalWgt.setData(self.signal)
         self._from = 0
 
         self._spectr = spectrofm(self.canvasH, 1, self.canvasH)
@@ -101,14 +103,14 @@ class App:
         self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
         self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
 
-        self._spectrData = FFTAnalysis(self.samples[(self._from)*self._sizeForFrame:
-                                                    (self._from)*self._sizeForFrame+512])
-        self._spectr.setMaxAmpl(max(self._spectrData))
-        self._spectr.setData(self._spectrData)
-        self._spectr.makeZone([0.1, 0.4, 0.3, 0.2])
-        self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
-        self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
-        self.с_imageSpctr = self.canvasSpectr.create_image(0, 0, anchor='nw', image=self.photoSpectr)
+        self._spectrData = self.signal.getFutie((self._from)*self._sizeForFrame, (self._from)*self._sizeForFrame+512)
+        if(len(self._spectrData)!=0):
+            self._spectr.setMaxAmpl(max(self._spectrData))
+            self._spectr.setData(self._spectrData)
+            self._spectr.drawAverZone([0.02, 0.4, 0.4, 0.18])
+            self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
+            self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
+            self.с_imageSpctr = self.canvasSpectr.create_image(0, 0, anchor='nw', image=self.photoSpectr)
 
         tStart = self._from * self._timePerImage
         timeStr = str(tStart//1000)+":"

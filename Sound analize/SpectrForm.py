@@ -1,6 +1,6 @@
 from Waveform import *
 class spectrofm(waveform):
-    def makeZone(self, zone):
+    def drawAverZone(self, zone=[0.02, 0.4, 0.4, 0.18]):
         if(len(self._signal)==0):
             return
         self._zone = zone

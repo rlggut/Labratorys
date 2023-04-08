@@ -1,5 +1,6 @@
 import math
 from Waveform import *
+from Signals import *
 from PIL import Image, ImageDraw, ImageTk
 
 class signalwidget():
@@ -12,10 +13,16 @@ class signalwidget():
         self._haveImage = False
         self._lastDue = (0,-1)
 
+
     def setData(self, sig=[]):
+        if(isinstance(sig, signal)):
+            self._signal = sig.getData()
+            self._time = (sig.getSize() * 1000) // self._framerate
+        else:
+            self._signal = sig
+            self._time = (len(sig) * 1000) // self._framerate
+
         self._haveImage = False
-        self._signal = sig
-        self._time = (len(sig)*1000) // self._framerate
         self._signal = self._signal[:((self._time * self._framerate) // 1000)]
         self._sizeForFrame = ((self._timePerImage * self._framerate) // 1000)
         self._numsOfFrames = math.ceil(self._time // self._timePerImage)
