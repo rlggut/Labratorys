@@ -13,9 +13,9 @@ class App:
         self.window.title("Осцилограмма")
         self.canvasW = 600
         self.canvasH = 200
-        self.researchTime = 3
         self.researchDelta=100
         self._furieCount = 512
+        self._silenceEdge = 700
         self.window.geometry("600x500")
         self.frame = Frame(self.window)
         self.frame.grid()
@@ -28,38 +28,48 @@ class App:
         self.btnFileOrig.grid(column=0, row=0)
         self.lblChoosedOrig = Label(self.frame, text=self.filename)
         self.lblChoosedOrig.grid(column=1, row=0, columnspan=4)
+        self.lblSilence = Label(self.frame, text="Порог тишины")
+        self.lblSilence.grid(column=5, row=0)
+        self.silenceSpin = Spinbox(self.frame, from_ =0, to = 1000, increment=10, width=5, command=self.__SilenceEdge)
+        self.silenceSpin.grid(column=6, row=0)
+        self.silenceSpin.delete(0, len(self.silenceSpin.get()))
+        self.silenceSpin.insert(0, str(self._silenceEdge))
 
         self.canvasOscill = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
-        self.canvasOscill.grid(column=0, row=1, columnspan=5)
+        self.canvasOscill.grid(column=0, row=1, columnspan=7)
 
         self.btnLeft = Button(self.frame, text="<-", command=self.__moveOscillLeft, state=DISABLED)
         self.btnLeft.grid(column=0, row=2)
         self.btnRight = Button(self.frame, text="->", command=self.__moveOscillRight)
-        self.btnRight.grid(column=4, row=2)
+        self.btnRight.grid(column=6, row=2)
 
         self.btnPlus = Button(self.frame, text="Zoom in(+)", command=self.__zoomIn)
         self.btnPlus.grid(column=1, row=2)
         self.btnMinus = Button(self.frame, text="Zoom out(-)", command=self.__zoomOut)
-        self.btnMinus.grid(column=3, row=2)
+        self.btnMinus.grid(column=5, row=2)
 
         self.lblDurance = Label(self.frame, text=":")
-        self.lblDurance.grid(column=2, row=2)
+        self.lblDurance.grid(column=2, row=2, columnspan=3)
 
         self.canvasSpectr = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
-        self.canvasSpectr.grid(column=0, row=3, columnspan=5)
+        self.canvasSpectr.grid(column=0, row=3, columnspan=7)
 
+        self.lblComboFurie = Label(self.frame, text="Элементов Фурье")
+        self.lblComboFurie.grid(column=0, row=4)
         self.var = StringVar()
         self.comboFurie = ttk.Combobox(self.frame, textvariable=self.var)
         self.comboFurie['values'] = [128, 256, 512, 1024, 2048]
         self.comboFurie.current(2)
         self.comboFurie['state'] = 'readonly'
-        self.comboFurie.grid(column=0, row=4)
+        self.comboFurie.grid(column=1, row=4)
         self.comboFurie.bind("<<ComboboxSelected>>", self.__changeFurieCount)
 
         self.__Draw()
         self.__correctButtons()
         self.window.mainloop()
-
+    def __SilenceEdge(self):
+        self._silenceEdge = int(self.silenceSpin.get())
+        self.__getData()
     def __changeFurieCount(self, event):
         self._furieCount = int(self.comboFurie.get())
         self.__Draw()
@@ -68,8 +78,11 @@ class App:
         if (file == ""):
             return False
         self.filename = file
-        self.lblChoosedOrig.configure(text=self.filename)
+        if(len(file)>40):
+            file=file[0:20]+'...'+file[-20:]
+        self.lblChoosedOrig.configure(text=file)
         self.__getData()
+        self.__Draw()
 
     def __zoomOut(self):
         self._frameImage = (self._frameImage*2)
@@ -111,9 +124,9 @@ class App:
     def __getData(self):
         self.wav = wave.open(self.filename, mode="r")
         (self._nchannels, self.sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
-        self.content = self.wav.readframes(min(self.researchTime * self._framerate, self._nframes))
+        self.content = self.wav.readframes(self._nframes)
         self.signal = signal(pointFromBuff(self.content, self.sampwidth))
-        self.signal.deleteSilence(self._framerate*100, 700)
+        self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
         self._timePerImage = 50
         self._frameImage = 4
