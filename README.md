@@ -39,3 +39,6 @@ Like prev lab, but this for finding edge number
 Somewhat for test creation for computer science
 
 [Wiki part](https://github.com/rlggut/Labratorys/wiki#lab-testmaker-pascalpython)
+
+# Lab: Sound analize(python)
+Небольшой исследовательский проект по работе с речью - построение осцилограммы и спектрограммы сигнала, удаление тишины.
