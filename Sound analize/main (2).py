@@ -6,6 +6,7 @@ from SignalWidget import *
 from SpectrForm import *
 from Signals import *
 from soundCommon import *
+from Spectr2D import *
 
 class App:
     def __init__(self):
@@ -127,6 +128,9 @@ class App:
         self.content = self.wav.readframes(self._nframes)
         self.signal = signal(pointFromBuff(self.content, self.sampwidth))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
+
+        sptr2D = spectr2D(self._framerate)
+        sptr2D.setData(self.signal.getData())
 
         self._timePerImage = 50
         self._frameImage = 4

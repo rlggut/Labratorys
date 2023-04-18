@@ -26,7 +26,7 @@ class waveform():
         for i in range(1,len(self._signal)):
             posY = self._signal[i]
             posY = (posY * (self._midPoint)) // self._maxAmp
-            self.draw.line([(t - 1, lastY), (t, - posY + self._midPoint)], fill=128, width=1)
+            self.draw.line([(t - 1, lastY), (t, - posY + self._midPoint)], fill="green", width=1)
             lastY = -posY + (self._midPoint)
             t += 1
         self.photo = ImageTk.PhotoImage(self._image)
