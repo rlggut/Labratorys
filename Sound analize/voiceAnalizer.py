@@ -22,7 +22,7 @@ for file in fileNames:
     # чтение всех файлов
     wav = wave.open(file, mode="r")
     (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
-    content = wav.readframes(min(researchTime * framerate, nframes))
+    content = wav.readframes(min(researchTime * framerate, nframes*nchannels))
     print(framerate)
     sign = signal(pointFromBuff(content, sampwidth))
     # отрезание тишины и получение спектрограммы

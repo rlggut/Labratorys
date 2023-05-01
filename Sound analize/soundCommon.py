@@ -3,7 +3,9 @@ def pointFromBuff(buff, sampwidth):
     points=[]
     minusBit=(2**(8*sampwidth-1))
     for i in range(0,len(buff)-sampwidth,sampwidth):
-        pt=buff[i+1]*256+buff[i]
+        pt=0
+        for j in range(sampwidth-1,-1,-1):
+            pt=pt*256+buff[i+j]
         if(pt>minusBit):
             pt=-(2*minusBit-pt)
         points.append(pt)

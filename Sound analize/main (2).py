@@ -125,7 +125,7 @@ class App:
     def __getData(self):
         self.wav = wave.open(self.filename, mode="r")
         (self._nchannels, self.sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
-        self.content = self.wav.readframes(self._nframes)
+        self.content = self.wav.readframes(self._nframes*self._nchannels)
         self.signal = signal(pointFromBuff(self.content, self.sampwidth))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
