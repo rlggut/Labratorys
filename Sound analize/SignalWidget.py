@@ -44,11 +44,14 @@ class signalwidget():
             return self._image
         if(frm == -1):
             frm = 0
-        frm = min(frm, self._numsOfFrames - self._frameImage)
+        frm = max(min(frm, self._numsOfFrames - self._frameImage),0)
         to = frm+self._frameImage
         if(self._lastDue != (frm,to)):
             self._image = Image.new("RGB", (self._sizeForFrame * self._frameImage, self._height), "white")
             for i in range(frm, to):
+                if(i>=len(self._images)):
+                    break
+                print(frm, to, i)
                 self._image.paste(self._images[i], ((i-frm)*((self._timePerImage * self._framerate) // 1000), 0))
         self._haveImage = True
         self._lastDue=(frm,to)
