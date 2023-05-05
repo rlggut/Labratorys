@@ -10,6 +10,14 @@ def pointFromBuff(buff, sampwidth):
             pt=-(2*minusBit-pt)
         points.append(pt)
     return(points)
+def chooseChannel(buff=[],channelsNum=1,currentNum=1):
+    res=[]
+    ind=0
+    for point in buff:
+        if ind==currentNum-1:
+            res.append(point)
+        ind=(ind+1)%channelsNum
+    return res
 def deleteSilence(samples, framerate=8000, chunkTimeSize=100, threshold=400):
     pointForResearch = chunkTimeSize * framerate // 1000
     newSample=[]

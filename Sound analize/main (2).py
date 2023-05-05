@@ -40,8 +40,10 @@ class App:
         self.canvasOscill.grid(column=0, row=1, columnspan=7)
 
         self.btnLeft = Button(self.frame, text="<-", command=self.__moveOscillLeft, state=DISABLED)
+        self.btnLeft.bind("<Left>", self.__moveOscillLeft)
         self.btnLeft.grid(column=0, row=2)
         self.btnRight = Button(self.frame, text="->", command=self.__moveOscillRight)
+        self.btnRight.bind("<Right>", self.__moveOscillRight)
         self.btnRight.grid(column=6, row=2)
 
         self.btnPlus = Button(self.frame, text="Zoom in(+)", command=self.__zoomIn)
@@ -114,11 +116,11 @@ class App:
             self.btnLeft['state'] = 'disabled'
         else:
             self.btnLeft['state'] = 'normal'
-    def __moveOscillLeft(self):
+    def __moveOscillLeft(self, event=None):
         self._from=max(self._from-1,0)
         self.__correctButtons()
         self.__Draw()
-    def __moveOscillRight(self):
+    def __moveOscillRight(self, event=None):
         self._from = min(self._from + 1, self._numsOfFrames-self._frameImage)
         self.__correctButtons()
         self.__Draw()
@@ -126,7 +128,7 @@ class App:
         self.wav = wave.open(self.filename, mode="r")
         (self._nchannels, self._sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
         self.content = self.wav.readframes(self._nframes*self._nchannels)
-        self.signal = signal(pointFromBuff(self.content, self._sampwidth))
+        self.signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
         sptr2D = spectr2D(self._framerate)
