@@ -124,9 +124,9 @@ class App:
         self.__Draw()
     def __getData(self):
         self.wav = wave.open(self.filename, mode="r")
-        (self._nchannels, self.sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
+        (self._nchannels, self._sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
         self.content = self.wav.readframes(self._nframes*self._nchannels)
-        self.signal = signal(pointFromBuff(self.content, self.sampwidth))
+        self.signal = signal(pointFromBuff(self.content, self._sampwidth))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
         sptr2D = spectr2D(self._framerate)
@@ -137,17 +137,18 @@ class App:
         self._sizeForFrame = ((self._timePerImage * self._framerate) // 1000)
         self._time = (self.signal.getSize()*1000) // self._framerate
         self._numsOfFrames = math.ceil(self._time // self._timePerImage)
-        self._signalWgt = signalwidget(self._framerate, self.sampwidth, 1024, self._timePerImage, self._frameImage)
+        self._signalWgt = signalwidget(self._framerate, self._sampwidth, 1024, self._timePerImage, self._frameImage)
         self._signalWgt.setData(self.signal)
         self._from = 0
 
-        self._spectr = spectrofm(self.canvasH, 1, self.canvasH)
+        self._spectr = spectrofm(self.canvasH, self._sampwidth, self.canvasH)
     def __Draw(self):
         self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
         draw = ImageDraw.Draw(self.imageOscill)
         #self._framerate * self._timePerImage * self._frameImage <-> self.canvasW
         furrTime = (self._furieCount * self.canvasW) /(self._framerate * self._timePerImage * self._frameImage)
         draw.line([(0, self.canvasH), (furrTime, self.canvasH)], fill="blue", width=1)
+        del draw
 
         self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
         self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
@@ -158,8 +159,14 @@ class App:
             self._spectr.setData(self._spectrData)
             #self._spectr.drawAverZone([0.02, 0.4, 0.4, 0.18])
             self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
-            self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
-            self.с_imageSpctr = self.canvasSpectr.create_image(0, 0, anchor='nw', image=self.photoSpectr)
+        else:
+            self.imageSpectr = Image.new("RGB", (self.canvasW, self.canvasH), "white")
+            draw_text = ImageDraw.Draw(self.imageSpectr)
+            fnt = ImageFont.truetype("arial.ttf", self.imageSpectr.height//2)
+            draw_text.text((self.imageSpectr.width//4,self.imageSpectr.height//4), 'NO DATA',font=fnt, fill=('#1C0606') )
+            del draw_text
+        self.photoSpectr = ImageTk.PhotoImage(self.imageSpectr)
+        self.с_imageSpctr = self.canvasSpectr.create_image(0, 0, anchor='nw', image=self.photoSpectr)
 
         tStart = self._from * self._timePerImage
         timeStr = str(tStart//1000)+":"

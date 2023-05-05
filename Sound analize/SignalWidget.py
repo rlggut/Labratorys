@@ -1,7 +1,7 @@
 import math
 from Waveform import *
 from Signals import *
-from PIL import Image, ImageDraw, ImageTk
+from PIL import Image, ImageDraw, ImageTk, ImageFont
 
 class signalwidget():
     def __init__(self, framerate=8000, sampwidth=2, height=400, timePerImage = 100, frameImages=4):
@@ -51,10 +51,14 @@ class signalwidget():
             for i in range(frm, to):
                 if(i>=len(self._images)):
                     break
-                print(frm, to, i)
                 self._image.paste(self._images[i], ((i-frm)*((self._timePerImage * self._framerate) // 1000), 0))
         self._haveImage = True
         self._lastDue=(frm,to)
+        if(len(self._images)==0):
+            draw_text = ImageDraw.Draw(self._image)
+            fnt = ImageFont.truetype("arial.ttf", self._image.height//2)
+            draw_text.text((self._image.width//3,self._image.height//4), 'NO DATA',font=fnt, fill=('#1C0606') )
+            del draw_text
         return self._image
     def saveImage(self, path="res.png"):
         if not self._haveImage:

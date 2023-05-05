@@ -9,6 +9,10 @@ class waveform():
             self._midPoint = self._height // 2
         else:
             self._midPoint = midPoint
+    def setSampwidth(self,samp=-1):
+        if(samp>0):
+            self._sampwidth = samp
+            self.setMaxAmpl()
     def setMaxAmpl(self, maxAmp=-1):
         if(maxAmp==-1):
             self._maxAmp=2 ** (self._sampwidth * 8 - 1)
@@ -19,16 +23,17 @@ class waveform():
         self._width = len(sig)
         self._image = Image.new("RGB", (self._width, self._height), "white")
 
-        self.draw = ImageDraw.Draw(self._image)
-        self.draw.line([(0, self._midPoint), (len(self._signal), self._midPoint)], fill="green", width=1)
+        draw = ImageDraw.Draw(self._image)
+        draw.line([(0, self._midPoint), (len(self._signal), self._midPoint)], fill="green", width=1)
         lastY =  (self._midPoint) - self._signal[0]
         t = 1
         for i in range(1,len(self._signal)):
             posY = self._signal[i]
             posY = (posY * (self._midPoint)) // self._maxAmp
-            self.draw.line([(t - 1, lastY), (t, - posY + self._midPoint)], fill="green", width=1)
+            draw.line([(t - 1, lastY), (t, - posY + self._midPoint)], fill="green", width=1)
             lastY = -posY + (self._midPoint)
             t += 1
+        del draw
         self.photo = ImageTk.PhotoImage(self._image)
     def getPhoto(self):
         return self.photo
