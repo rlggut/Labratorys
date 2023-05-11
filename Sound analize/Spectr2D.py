@@ -21,21 +21,26 @@ def drawSpectrLine(data, width=100,height=-1, blockSizeVert=1):
 
 
 class spectr2D():
-    def __init__(self, framerate):
+    def __init__(self, framerate=8000):
         self._framerate=framerate
         self._furieCount=1024
-        self._timeStep=self._furieCount//16
+        self._step= self._furieCount // 16
         self._lineWidth=1
-
+        self._width=0
+    def setTimeStep(self,step):
+        self._step=step
+    def getImage(self):
+        if(self._width==0): return Image.new("RGB", (100, 100), "white")
+        return self._image
     def setData(self, sig = []):
         if (isinstance(sig, signal)): self._signal = sig.getData()
         else: self._signal = sig
         self._width=len(self._signal)
         if(self._width==0): return
-        self._width=(self._width//self._timeStep)*self._timeStep
-        self._image = Image.new("RGB", ((self._width*self._lineWidth)//self._timeStep, self._furieCount//2), "white")
-        for i in range(self._width//self._timeStep):
-            frm=i*self._furieCount
+        self._width= (self._width // self._step) * self._step
+        self._image = Image.new("RGB", ((self._width*self._lineWidth) // self._step, self._furieCount // 2), "white")
+        for i in range(self._width//self._step):
+            frm=i*self._step
             to=frm+self._furieCount
             if(to>=len(self._signal)):
                 to=len(self._signal)-1
