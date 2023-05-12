@@ -34,9 +34,8 @@ class waveform():
             lastY = -posY + (self._midPoint)
             t += 1
         del draw
-        self.photo = ImageTk.PhotoImage(self._image)
     def getPhoto(self):
-        return self.photo
+        return ImageTk.PhotoImage(self._image)
     def getImage(self):
         return self._image
     def saveImage(self, path="res.png"):

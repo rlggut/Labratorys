@@ -40,7 +40,10 @@ class spectr2D():
     def setStep(self,step):
         self._step=step
         self.setData(self._signal)
+    def stopWork(self):
+        self._work=False
     def setData(self, sig = []):
+        self._work=True
         if (isinstance(sig, signal)): self._signal = sig.getData()
         else: self._signal = sig
         self._width=len(self._signal)
@@ -48,6 +51,8 @@ class spectr2D():
         self._width= (self._width // self._step) * self._step
         self._image = Image.new("RGB", ((self._width*self._lineWidth) // self._step, self._furieCount // 2), "white")
         for i in range(self._width//self._step):
+            if(not self._work):
+                break
             frm=i*self._step
             to=frm+self._furieCount
             if(to>=len(self._signal)):
@@ -55,3 +60,4 @@ class spectr2D():
                 frm=to-self._furieCount
             self._image.paste(drawSpectrLine(self._signal[frm:to],self._lineWidth,512,1), (i*self._lineWidth,0))
         self._image.save("spectr2D.png")
+        self._work = False

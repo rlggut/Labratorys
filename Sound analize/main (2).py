@@ -7,6 +7,7 @@ from SpectrForm import *
 from Signals import *
 from soundCommon import *
 from Spectr2D import *
+import time
 import threading
 
 class App:
@@ -20,7 +21,9 @@ class App:
         self._silenceEdge = 700
         self.imageSptr2D=None
         self.spectrReady=False
+        self.oscillReady = False
         self._lastTimeLine = None
+        self._reload = False
         self.window.geometry("1200x500")
         self.frame = Frame(self.window)
         self.frame.grid()
@@ -35,7 +38,7 @@ class App:
         self.lblChoosedOrig.grid(column=1, row=0, columnspan=4)
         self.lblSilence = Label(self.frame, text="Порог тишины")
         self.lblSilence.grid(column=5, row=0)
-        self.silenceSpin = Spinbox(self.frame, from_ =0, to = 1000, increment=10, width=5, command=self.__SilenceEdge)
+        self.silenceSpin = Spinbox(self.frame, from_ =0, to = 1000, increment=10, width=5, command=self.__SilenceEdge, state=DISABLED)
         self.silenceSpin.grid(column=6, row=0)
         self.silenceSpin.delete(0, len(self.silenceSpin.get()))
         self.silenceSpin.insert(0, str(self._silenceEdge))
@@ -46,13 +49,13 @@ class App:
         self.btnLeft = Button(self.frame, text="<-", command=self.__moveOscillLeft, state=DISABLED)
         self.btnLeft.bind("<Left>", self.__moveOscillLeft)
         self.btnLeft.grid(column=0, row=2)
-        self.btnRight = Button(self.frame, text="->", command=self.__moveOscillRight)
+        self.btnRight = Button(self.frame, text="->", command=self.__moveOscillRight, state=DISABLED)
         self.btnRight.bind("<Right>", self.__moveOscillRight)
         self.btnRight.grid(column=6, row=2)
 
-        self.btnPlus = Button(self.frame, text="Zoom in(+)", command=self.__zoomIn)
+        self.btnPlus = Button(self.frame, text="Zoom in(+)", command=self.__zoomIn, state=DISABLED)
         self.btnPlus.grid(column=1, row=2)
-        self.btnMinus = Button(self.frame, text="Zoom out(-)", command=self.__zoomOut)
+        self.btnMinus = Button(self.frame, text="Zoom out(-)", command=self.__zoomOut, state=DISABLED)
         self.btnMinus.grid(column=5, row=2)
 
         self.lblDurance = Label(self.frame, text=":")
@@ -75,7 +78,6 @@ class App:
         self.comboFurie.bind("<<ComboboxSelected>>", self.__changeFurieCount)
 
         self.__Draw()
-        self.__correctButtons()
         self.window.mainloop()
     def __SilenceEdge(self):
         self._silenceEdge = int(self.silenceSpin.get())
@@ -91,7 +93,15 @@ class App:
         if(len(file)>40):
             file=file[0:20]+'...'+file[-20:]
         self.lblChoosedOrig.configure(text=file)
+        self._reload=True
+        self.sptr2D.stopWork()
+        self._signalWgt.stopWork()
+        while(not self.spectrReady or not self.oscillReady):
+            time.sleep(0.03)
         self.spectrReady=False
+        self.oscillReady=False
+        self._reload = False
+        self.__blockButtons()
         self.__getData()
         self.__Draw()
 
@@ -107,12 +117,18 @@ class App:
         self._signalWgt.setZoom(self._frameImage)
         self.__correctButtons()
         self.__Draw()
+    def __blockButtons(self):
+        self.btnMinus['state'] = 'disabled'
+        self.btnPlus['state'] = 'disabled'
+        self.btnRight['state'] = 'disabled'
+        self.btnLeft['state'] = 'disabled'
+        self.silenceSpin['state'] = 'disabled'
     def __correctButtons(self):
         if (self._numsOfFrames < 2*self._frameImage):
             self.btnMinus['state'] = 'disabled'
         else:
             self.btnMinus['state'] = 'normal'
-        if (self._numsOfFrames == 1):
+        if (self._frameImage == 1):
             self.btnPlus['state'] = 'disabled'
         else:
             self.btnPlus['state'] = 'normal'
@@ -139,27 +155,45 @@ class App:
         self.signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
-        thr = threading.Thread(target=self.__ThreadSpectr2d)
-        thr.start()
+        self._thrSpectr2d = threading.Thread(target=self.__ThreadSpectr2d)
+        self._thrSpectr2d.start()
 
         self._timePerImage = 50
         self._frameImage = 4
         self._sizeForFrame = ((self._timePerImage * self._framerate) // 1000)
         self._time = (self.signal.getSize()*1000) // self._framerate
         self._numsOfFrames = math.ceil(self._time // self._timePerImage)
+        self._from = 0
+        #self.__ThreadOscill()
+        self._thrOscill = threading.Thread(target=self.__ThreadOscill)
+        self._thrOscill.start()
+        self._spectr = spectrofm(self.canvasH, self._sampwidth, self.canvasH)
+
+    def __ThreadOscill(self):
+        self.oscillReady = False
         self._signalWgt = signalwidget(self._framerate, self._sampwidth, 1024, self._timePerImage, self._frameImage)
         self._signalWgt.setData(self.signal)
-        self._from = 0
+        if(not self._reload):
+            self.imageOscill = self._signalWgt.getImage(0).resize((self.canvasW, self.canvasH))
+            draw = ImageDraw.Draw(self.imageOscill)
+            furrTime = (self._furieCount * self.canvasW) / (self._framerate * self._timePerImage * self._frameImage)
+            draw.line([(0, self.canvasH), (furrTime, self.canvasH)], fill="blue", width=1)
+            del draw
+            self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
+            self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
+            self.__correctButtons()
+            self.silenceSpin['state'] = 'normal'
+        self.oscillReady=True
 
-        self._spectr = spectrofm(self.canvasH, self._sampwidth, self.canvasH)
     def __ThreadSpectr2d(self):
         self.sptr2D = spectr2D(self._framerate)
         self.sptr2D.setData(self.signal.getData())
-        image = self.sptr2D.getImage()
-        self._kfSpctr2D = (self.canvasW // 2) / image.width
-        self.imageSptr2D = image.resize((self.canvasW // 2, self.canvasH))
-        self.photoSptr2D = ImageTk.PhotoImage(self.imageSptr2D)
-        self.с_imageSptr2D = self.canvasSptr2D.create_image(0, 0, anchor='nw', image=self.photoSptr2D)
+        if(not self._reload):
+            image = self.sptr2D.getImage()
+            self._kfSpctr2D = (self.canvasW // 2) / image.width
+            self.imageSptr2D = image.resize((self.canvasW // 2, self.canvasH))
+            self.photoSptr2D = ImageTk.PhotoImage(self.imageSptr2D)
+            self.с_imageSptr2D = self.canvasSptr2D.create_image(0, 0, anchor='nw', image=self.photoSptr2D)
         self.spectrReady=True
 
     def __Draw(self):
@@ -168,16 +202,15 @@ class App:
             if(self._lastTimeLine):
                 self.canvasSptr2D.delete(self._lastTimeLine)
             self._lastTimeLine = self.canvasSptr2D.create_line((timeLine,0),(timeLine,self.canvasH),fill="red",width=self.sptr2D.getLineWidth())
-
-        self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
-        draw = ImageDraw.Draw(self.imageOscill)
-        #self._framerate * self._timePerImage * self._frameImage <-> self.canvasW
-        furrTime = (self._furieCount * self.canvasW) /(self._framerate * self._timePerImage * self._frameImage)
-        draw.line([(0, self.canvasH), (furrTime, self.canvasH)], fill="blue", width=1)
-        del draw
-
-        self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
-        self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
+        if(self.oscillReady):
+            self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
+            draw = ImageDraw.Draw(self.imageOscill)
+            #self._framerate * self._timePerImage * self._frameImage <-> self.canvasW
+            furrTime = (self._furieCount * self.canvasW) /(self._framerate * self._timePerImage * self._frameImage)
+            draw.line([(0, self.canvasH), (furrTime, self.canvasH)], fill="blue", width=1)
+            del draw
+            self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
+            self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
 
         self._spectrData = self.signal.getFutie((self._from)*self._sizeForFrame, (self._from)*self._sizeForFrame+self._furieCount)
         if(len(self._spectrData)!=0):
@@ -202,7 +235,6 @@ class App:
         if(tStart<10):
             timeStr = timeStr+'0'
         timeStr = timeStr + str(tStart) + ' - '
-
         tEnd = ((self._from+self._frameImage)*self._timePerImage)
         timeStr = timeStr+str(tEnd//1000)+":"
         tEnd = tEnd%1000
@@ -211,7 +243,6 @@ class App:
         if(tEnd<10):
             timeStr = timeStr+'0'
         timeStr = timeStr + str(tEnd)
-
         self.lblDurance.configure(text=timeStr)
 
 

@@ -15,6 +15,7 @@ class signalwidget():
 
 
     def setData(self, sig=[]):
+        self._work = True
         if(isinstance(sig, signal)):
             self._signal = sig.getData()
             self._time = (sig.getSize() * 1000) // self._framerate
@@ -29,17 +30,23 @@ class signalwidget():
         self._images=[]
         self._waves=[]
         for i in range(self._numsOfFrames):
+            if(not self._work):
+                break
             wave = waveform(self._height, self._sampwidth)
             wave.setData(self._signal[i*self._sizeForFrame
                                         : min((i+1)*self._sizeForFrame,len(self._signal))])
             self._waves.append(wave)
             self._images.append(self._waves[i].getImage())
         self.getImage()
+        self._work = False
+    def stopWork(self):
+        self._work=False
     def setZoom(self, zoom):
         self._frameImage = zoom
         self._lastDue = (-1, 0)
 
     def getImage(self, frm=-1):
+        self._work = True
         if(frm == -1 and self._haveImage):
             return self._image
         if(frm == -1):
@@ -49,7 +56,7 @@ class signalwidget():
         if(self._lastDue != (frm,to)):
             self._image = Image.new("RGB", (self._sizeForFrame * self._frameImage, self._height), "white")
             for i in range(frm, to):
-                if(i>=len(self._images)):
+                if(i>=len(self._images) or (not self._work)):
                     break
                 self._image.paste(self._images[i], ((i-frm)*((self._timePerImage * self._framerate) // 1000), 0))
         self._haveImage = True
@@ -59,6 +66,7 @@ class signalwidget():
             fnt = ImageFont.truetype("arial.ttf", self._image.height//2)
             draw_text.text((self._image.width//3,self._image.height//4), 'NO DATA',font=fnt, fill=('#1C0606') )
             del draw_text
+        self._work = False
         return self._image
     def saveImage(self, path="res.png"):
         if not self._haveImage:
