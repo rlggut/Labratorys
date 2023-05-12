@@ -12,12 +12,13 @@ class App:
     def __init__(self):
         self.window = Tk()
         self.window.title("Осцилограмма")
-        self.canvasW = 600
+        self.canvasW = 1200
         self.canvasH = 200
         self.researchDelta=100
         self._furieCount = 512
         self._silenceEdge = 700
-        self.window.geometry("600x500")
+        self.imageSptr2D=None
+        self.window.geometry("1200x500")
         self.frame = Frame(self.window)
         self.frame.grid()
 
@@ -37,7 +38,7 @@ class App:
         self.silenceSpin.insert(0, str(self._silenceEdge))
 
         self.canvasOscill = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
-        self.canvasOscill.grid(column=0, row=1, columnspan=7)
+        self.canvasOscill.grid(column=0, row=1, columnspan=14)
 
         self.btnLeft = Button(self.frame, text="<-", command=self.__moveOscillLeft, state=DISABLED)
         self.btnLeft.bind("<Left>", self.__moveOscillLeft)
@@ -54,8 +55,11 @@ class App:
         self.lblDurance = Label(self.frame, text=":")
         self.lblDurance.grid(column=2, row=2, columnspan=3)
 
-        self.canvasSpectr = Canvas(self.frame, height=self.canvasH, width=self.canvasW, bg='white')
+        self.canvasSpectr = Canvas(self.frame, height=self.canvasH, width=self.canvasW//2, bg='white')
         self.canvasSpectr.grid(column=0, row=3, columnspan=7)
+
+        self.canvasSptr2D = Canvas(self.frame, height=self.canvasH, width=self.canvasW//2, bg='white')
+        self.canvasSptr2D.grid(column=7, row=3, columnspan=7)
 
         self.lblComboFurie = Label(self.frame, text="Элементов Фурье")
         self.lblComboFurie.grid(column=0, row=4)
@@ -131,8 +135,8 @@ class App:
         self.signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
-        sptr2D = spectr2D(self._framerate)
-        sptr2D.setData(self.signal.getData())
+        self.sptr2D = spectr2D(self._framerate)
+        self.sptr2D.setData(self.signal.getData())
 
         self._timePerImage = 50
         self._frameImage = 4
@@ -145,6 +149,18 @@ class App:
 
         self._spectr = spectrofm(self.canvasH, self._sampwidth, self.canvasH)
     def __Draw(self):
+        if not(self.imageSptr2D):
+            self._lastTimeLine=None
+            image = self.sptr2D.getImage()
+            self._kfSpctr2D=(self.canvasW//2)/image.width
+            self.imageSptr2D = image.resize((self.canvasW//2, self.canvasH))
+            self.photoSptr2D = ImageTk.PhotoImage(self.imageSptr2D)
+            self.с_imageSptr2D = self.canvasSptr2D.create_image(0, 0, anchor='nw', image=self.photoSptr2D)
+        timeLine=int(((self._from*self._sizeForFrame*self._kfSpctr2D)/self.sptr2D.getStep())*self.sptr2D.getLineWidth())+1
+        if(self._lastTimeLine):
+            self.canvasSptr2D.delete(self._lastTimeLine)
+        self._lastTimeLine = self.canvasSptr2D.create_line((timeLine,0),(timeLine,self.canvasH),fill="red",width=self.sptr2D.getLineWidth())
+
         self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
         draw = ImageDraw.Draw(self.imageOscill)
         #self._framerate * self._timePerImage * self._frameImage <-> self.canvasW
@@ -160,9 +176,9 @@ class App:
             self._spectr.setMaxAmpl(max(self._spectrData))
             self._spectr.setData(self._spectrData)
             #self._spectr.drawAverZone([0.02, 0.4, 0.4, 0.18])
-            self.imageSpectr = self._spectr.getImage().resize((self.canvasW, self.canvasH))
+            self.imageSpectr = self._spectr.getImage().resize((self.canvasW//2, self.canvasH))
         else:
-            self.imageSpectr = Image.new("RGB", (self.canvasW, self.canvasH), "white")
+            self.imageSpectr = Image.new("RGB", (self.canvasW//2, self.canvasH), "white")
             draw_text = ImageDraw.Draw(self.imageSpectr)
             fnt = ImageFont.truetype("arial.ttf", self.imageSpectr.height//2)
             draw_text.text((self.imageSpectr.width//4,self.imageSpectr.height//4), 'NO DATA',font=fnt, fill=('#1C0606') )

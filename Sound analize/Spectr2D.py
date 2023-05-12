@@ -27,11 +27,19 @@ class spectr2D():
         self._step= self._furieCount // 16
         self._lineWidth=1
         self._width=0
-    def setTimeStep(self,step):
-        self._step=step
     def getImage(self):
         if(self._width==0): return Image.new("RGB", (100, 100), "white")
         return self._image
+    def getLineWidth(self):
+        return self._lineWidth
+    def setLineWidth(self,width):
+        self._lineWidth=width
+        self.setData(self._signal)
+    def getStep(self):
+        return self._step
+    def setStep(self,step):
+        self._step=step
+        self.setData(self._signal)
     def setData(self, sig = []):
         if (isinstance(sig, signal)): self._signal = sig.getData()
         else: self._signal = sig
