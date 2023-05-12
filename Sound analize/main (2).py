@@ -7,6 +7,7 @@ from SpectrForm import *
 from Signals import *
 from soundCommon import *
 from Spectr2D import *
+import threading
 
 class App:
     def __init__(self):
@@ -18,6 +19,8 @@ class App:
         self._furieCount = 512
         self._silenceEdge = 700
         self.imageSptr2D=None
+        self.spectrReady=False
+        self._lastTimeLine = None
         self.window.geometry("1200x500")
         self.frame = Frame(self.window)
         self.frame.grid()
@@ -88,6 +91,7 @@ class App:
         if(len(file)>40):
             file=file[0:20]+'...'+file[-20:]
         self.lblChoosedOrig.configure(text=file)
+        self.spectrReady=False
         self.__getData()
         self.__Draw()
 
@@ -135,8 +139,8 @@ class App:
         self.signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
         self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
 
-        self.sptr2D = spectr2D(self._framerate)
-        self.sptr2D.setData(self.signal.getData())
+        thr = threading.Thread(target=self.__ThreadSpectr2d)
+        thr.start()
 
         self._timePerImage = 50
         self._frameImage = 4
@@ -148,18 +152,22 @@ class App:
         self._from = 0
 
         self._spectr = spectrofm(self.canvasH, self._sampwidth, self.canvasH)
+    def __ThreadSpectr2d(self):
+        self.sptr2D = spectr2D(self._framerate)
+        self.sptr2D.setData(self.signal.getData())
+        image = self.sptr2D.getImage()
+        self._kfSpctr2D = (self.canvasW // 2) / image.width
+        self.imageSptr2D = image.resize((self.canvasW // 2, self.canvasH))
+        self.photoSptr2D = ImageTk.PhotoImage(self.imageSptr2D)
+        self.с_imageSptr2D = self.canvasSptr2D.create_image(0, 0, anchor='nw', image=self.photoSptr2D)
+        self.spectrReady=True
+
     def __Draw(self):
-        if not(self.imageSptr2D):
-            self._lastTimeLine=None
-            image = self.sptr2D.getImage()
-            self._kfSpctr2D=(self.canvasW//2)/image.width
-            self.imageSptr2D = image.resize((self.canvasW//2, self.canvasH))
-            self.photoSptr2D = ImageTk.PhotoImage(self.imageSptr2D)
-            self.с_imageSptr2D = self.canvasSptr2D.create_image(0, 0, anchor='nw', image=self.photoSptr2D)
-        timeLine=int(((self._from*self._sizeForFrame*self._kfSpctr2D)/self.sptr2D.getStep())*self.sptr2D.getLineWidth())+1
-        if(self._lastTimeLine):
-            self.canvasSptr2D.delete(self._lastTimeLine)
-        self._lastTimeLine = self.canvasSptr2D.create_line((timeLine,0),(timeLine,self.canvasH),fill="red",width=self.sptr2D.getLineWidth())
+        if(self.spectrReady):
+            timeLine=int(((self._from*self._sizeForFrame*self._kfSpctr2D)/self.sptr2D.getStep())*self.sptr2D.getLineWidth())+1
+            if(self._lastTimeLine):
+                self.canvasSptr2D.delete(self._lastTimeLine)
+            self._lastTimeLine = self.canvasSptr2D.create_line((timeLine,0),(timeLine,self.canvasH),fill="red",width=self.sptr2D.getLineWidth())
 
         self.imageOscill = self._signalWgt.getImage(self._from).resize((self.canvasW, self.canvasH))
         draw = ImageDraw.Draw(self.imageOscill)
