@@ -1,9 +1,9 @@
+#License: CC BY
+#Roman Gutenkov, 30/05/23
+#Version: 0.1.
+
 from tkinter import *
-from tkinter import filedialog
 from PIL import Image, ImageTk
-import sys
-import os
-import re
 
 class imageProc():
     def __init__(self):
@@ -55,6 +55,6 @@ class imageProc():
 
 proc = imageProc()
 proc.setImage("base.jpg")
-proc.getMagnifMosaik(50)
+proc.getMagnifMosaik(2)
 proc.saveMosaik("baseNw.jpg")
 proc.getMosaik().show()
