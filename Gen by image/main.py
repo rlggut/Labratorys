@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.1.
+#Version: 0.1.2.
 
 from tkinter import *
 from PIL import Image, ImageTk
@@ -13,6 +13,7 @@ class imageProc():
     def __init__(self):
         self._image = Image.new("RGB", (256, 256), "white")
         self._imageMos = None
+        self._waveImage = None
         self._matrX, self._matrY = Matrix(3, 3), Matrix(3, 3)
         self._matrX.setSobelX()
         self._matrY.setSobelY()
@@ -76,6 +77,64 @@ class imageProc():
         if not(self._imageMos):
             self.getMosaik()
         self._sobelMosaik.save(filename)
+    def __comparePix(self,x,y,tx,ty,deg=80):
+        col1=self._image.getpixel((x,y))
+        col2=self._image.getpixel((tx,ty))
+        if(col1==(255,255,255) or col2==(255,255,255)): return False
+        proc=0
+        for i in range(3): proc+=abs(col1[i]-col2[i])
+        return (proc<deg)
+
+    def waveMosaik(self, deg=80):
+        self._waveImage = self._image
+        white=(255,255,255)
+        image = Image.new("RGB", (self._waveImage.width, self._waveImage.height), "white")
+        for y in range(self._waveImage.height):
+            for x in range(self._waveImage.width):
+                if(self._waveImage.getpixel((x,y))!=white):
+                    st=[]
+                    st.append([x,y])
+                    pixels=[]
+                    while(len(st)>0):
+                        point = st.pop()
+                        tx, ty = point[0], point[1]
+                        pixels.append([tx,ty])
+                        if(tx>0):
+                            if(self.__comparePix(tx-1,ty,tx,ty,deg)):
+                                st.append([tx-1, ty])
+                                self._waveImage.putpixel((tx-1, ty), white)
+                        if(ty>0):
+                            if(self.__comparePix(tx,ty-1,tx,ty,deg)):
+                                st.append([tx, ty-1])
+                                self._waveImage.putpixel((tx, ty-1), white)
+                        if(tx+1<self._waveImage.width):
+                            if(self.__comparePix(tx+1,ty,tx,ty,deg)):
+                                st.append([tx+1, ty])
+                                self._waveImage.putpixel((tx+1, ty), white)
+                        if(ty+1<self._waveImage.height):
+                            if(self.__comparePix(tx,ty+1,tx,ty,deg)):
+                                st.append([tx, ty+1])
+                                self._waveImage.putpixel((tx, ty+1), white)
+                    r, g, b = 0, 0, 0
+                    n=len(pixels)
+                    for i in range(n):
+                        p = self._image.getpixel((pixels[i][0], pixels[i][1]))
+                        r += (p[0] / n)
+                        g += (p[1] / n)
+                        b += (p[2] / n)
+                    for i in range(n):
+                        image.putpixel((pixels[i][0], pixels[i][1]),(int(r),int(g),int(b)))
+        self._waveImage = image
+    def getWaveMosaik(self):
+        if(not self._waveImage):
+            self.waveMosaik()
+        return self._waveImage
+    def saveWaveMosaik(self, filename=""):
+        if(filename==""):
+            filename= "WaveMos_"+self._fileName
+        if not(self._waveImage):
+            self.getWaveMosaik()
+        self._waveImage.save(filename)
 
 
 proc = imageProc()
@@ -83,3 +142,4 @@ proc.setImage("base.jpg")
 proc.getMagnifMosaik(2)
 proc.saveMosaik("baseNw.jpg")
 proc.saveSobMosaik("baseSobNw.jpg")
+proc.saveWaveMosaik("baseWave.jpg")
