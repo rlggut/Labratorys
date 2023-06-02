@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.2.
+#Version: 0.1.2.1
 
 from tkinter import *
 from PIL import Image, ImageTk
@@ -78,15 +78,16 @@ class imageProc():
             self.getMosaik()
         self._sobelMosaik.save(filename)
     def __comparePix(self,x,y,tx,ty,deg=80):
-        col1=self._image.getpixel((x,y))
+        col1=self._waveImage.getpixel((x,y))
         col2=self._image.getpixel((tx,ty))
-        if(col1==(255,255,255) or col2==(255,255,255)): return False
+        if(col1==(255,255,255) or col2==(255,255,255)):
+            return False
         proc=0
         for i in range(3): proc+=abs(col1[i]-col2[i])
         return (proc<deg)
 
-    def waveMosaik(self, deg=80):
-        self._waveImage = self._image
+    def waveMosaik(self, deg=20):
+        self._waveImage = self._image.copy()
         white=(255,255,255)
         image = Image.new("RGB", (self._waveImage.width, self._waveImage.height), "white")
         for y in range(self._waveImage.height):
@@ -95,6 +96,7 @@ class imageProc():
                     st=[]
                     st.append([x,y])
                     pixels=[]
+                    self._waveImage.putpixel((x, y), white)
                     while(len(st)>0):
                         point = st.pop()
                         tx, ty = point[0], point[1]
@@ -143,3 +145,4 @@ proc.getMagnifMosaik(2)
 proc.saveMosaik("baseNw.jpg")
 proc.saveSobMosaik("baseSobNw.jpg")
 proc.saveWaveMosaik("baseWave.jpg")
+proc.getWaveMosaik().show()
