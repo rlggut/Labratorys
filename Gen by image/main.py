@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.2.1
+#Version: 0.1.3.0
 
 from tkinter import *
 from PIL import Image, ImageTk
@@ -89,10 +89,11 @@ class imageProc():
     def waveMosaik(self, deg=20):
         self._waveImage = self._image.copy()
         white=(255,255,255)
-        image = Image.new("RGB", (self._waveImage.width, self._waveImage.height), "white")
+        images=[]
         for y in range(self._waveImage.height):
             for x in range(self._waveImage.width):
                 if(self._waveImage.getpixel((x,y))!=white):
+                    upper,down,left,right=y,y,x,x
                     st=[]
                     st.append([x,y])
                     pixels=[]
@@ -100,7 +101,11 @@ class imageProc():
                     while(len(st)>0):
                         point = st.pop()
                         tx, ty = point[0], point[1]
-                        pixels.append([tx,ty])
+                        upper = min(upper, ty)
+                        down = max(down, ty)
+                        left = min(left, tx)
+                        right = max(right, tx)
+                        pixels.append([tx, ty])
                         if(tx>0):
                             if(self.__comparePix(tx-1,ty,tx,ty,deg)):
                                 st.append([tx-1, ty])
@@ -124,9 +129,20 @@ class imageProc():
                         r += (p[0] / n)
                         g += (p[1] / n)
                         b += (p[2] / n)
+                    image = Image.new("RGB", (right - left + 1, down - upper + 1), "white")
                     for i in range(n):
-                        image.putpixel((pixels[i][0], pixels[i][1]),(int(r),int(g),int(b)))
-        self._waveImage = image
+                        image.putpixel((pixels[i][0] - left, pixels[i][1] - upper),(int(r),int(g),int(b)))
+                    images.append([image,left,upper,n])
+        image = Image.new("RGB", (self._waveImage.width, self._waveImage.height), "white")
+        for i in range(len(images)):
+            im = images[i][0]
+            x, y = images[i][1], images[i][2]
+            n, m = im.height, im.width
+            for ty in range(n):
+                for tx in range(m):
+                    if(image.getpixel((tx+x,ty+y))==(255,255,255)):
+                        image.putpixel((tx+x,ty+y),im.getpixel((tx,ty)))
+        self._waveImage = image.copy()
     def getWaveMosaik(self):
         if(not self._waveImage):
             self.waveMosaik()
