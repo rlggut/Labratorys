@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.3.0
+#Version: 0.1.3.1
 
 from tkinter import *
 from PIL import Image, ImageTk
@@ -17,12 +17,23 @@ class imageProc():
         self._matrX, self._matrY = Matrix(3, 3), Matrix(3, 3)
         self._matrX.setSobelX()
         self._matrY.setSobelY()
+        self._smoothed = False
 
     def setImage(self, filename):
         self._fileName = filename
         self._image = Image.open(filename)
         self._imageMos = None
         self._lastMosN, self._lastMosM = 0, 0
+    def makeSmooth(self):
+        if(not self._smoothed):
+            self._image = makeGaussSmooth(self._image)
+        self._smoothed = True
+    def saveSmooth(self):
+        filename= "Smooth_"+self._fileName
+        if(not self._smoothed):
+            self.makeSmooth()
+        self._image.save(filename)
+
     def createMosaik(self, n=25, m=25):
         if(n<0): n=1
         if(m<0): m=1
@@ -86,7 +97,7 @@ class imageProc():
         for i in range(3): proc+=abs(col1[i]-col2[i])
         return (proc<deg)
 
-    def waveMosaik(self, deg=20):
+    def waveMosaik(self, deg=10):
         self._waveImage = self._image.copy()
         white=(255,255,255)
         images=[]
@@ -101,10 +112,8 @@ class imageProc():
                     while(len(st)>0):
                         point = st.pop()
                         tx, ty = point[0], point[1]
-                        upper = min(upper, ty)
-                        down = max(down, ty)
-                        left = min(left, tx)
-                        right = max(right, tx)
+                        upper, down = min(upper, ty), max(down, ty)
+                        left, right = min(left, tx), max(right, tx)
                         pixels.append([tx, ty])
                         if(tx>0):
                             if(self.__comparePix(tx-1,ty,tx,ty,deg)):
@@ -134,6 +143,7 @@ class imageProc():
                         image.putpixel((pixels[i][0] - left, pixels[i][1] - upper),(int(r),int(g),int(b)))
                     images.append([image,left,upper,n])
         image = Image.new("RGB", (self._waveImage.width, self._waveImage.height), "white")
+        print(len(images))
         for i in range(len(images)):
             im = images[i][0]
             x, y = images[i][1], images[i][2]
@@ -157,7 +167,10 @@ class imageProc():
 
 proc = imageProc()
 proc.setImage("base.jpg")
-proc.getMagnifMosaik(2)
+#proc.setImage("Apple.png")
+proc.makeSmooth()
+proc.saveSmooth()
+proc.getMagnifMosaik(4)
 proc.saveMosaik("baseNw.jpg")
 proc.saveSobMosaik("baseSobNw.jpg")
 proc.saveWaveMosaik("baseWave.jpg")
