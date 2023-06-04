@@ -13,10 +13,11 @@ def makeGaussSmooth(image):
             r,g,b=0,0,0
             for j in range(-2,3):
                 for i in range(-2,3):
-                    r += gauss.getMatrXY(i + 2, j + 2) * image.getpixel((x + i, y + j))[0]
-                    g += gauss.getMatrXY(i + 2, j + 2) * image.getpixel((x + i, y + j))[1]
-                    b += gauss.getMatrXY(i + 2, j + 2) * image.getpixel((x + i, y + j))[2]
-            res.putpixel((x,y),(r,g,b))
+                    if(x+i>=0 and x+i<image.width and y+j>=0 and y+j<image.height):
+                        r += gauss.getMatrXY(i + 2, j + 2) * image.getpixel((x + i, y + j))[0]
+                        g += gauss.getMatrXY(i + 2, j + 2) * image.getpixel((x + i, y + j))[1]
+                        b += gauss.getMatrXY(i + 2, j + 2) * image.getpixel((x + i, y + j))[2]
+            res.putpixel((x,y),(int(r),int(g),int(b)))
     return res
 
 def maskedImageMatrix(image, matrX, matrY, edge):
@@ -26,18 +27,22 @@ def maskedImageMatrix(image, matrX, matrY, edge):
         return False
     if not(isinstance(matrY, Matrix)):
         return False
-    if(matrX.getN!=matrY.getN): return False
-    if(matrX.getM!=matrY.getM): return False
-    if(matrX.getM!=matrX.getN): return False
-    if(matrX.getN%2==0): return False
+    if(matrX.getN()!=matrY.getN()):
+        return False
+    if(matrX.getM()!=matrY.getM()):
+        return False
+    if(matrX.getM()!=matrX.getN()):
+        return False
+    if(matrX.getN()%2==0):
+        return False
     res = Image.new('RGB', (image.width, image.height), (0,0,0))
-    delt=(matrX.getN-1)//2
+    delt=(matrX.getN()-1)//2
     for y in range(delt,image.height-delt):
         for x in range(delt,image.width-delt):
             gX = 0
             gY = 0
-            for j in range(-delt,2*delt+2):
-                for i in range(-1,2*delt+2):
+            for j in range(-delt,delt+1):
+                for i in range(-delt,delt+1):
                     value = image.getpixel((x+i, y+j))
                     if(isinstance(value,tuple)):
                         value=((value[0]+value[1]+value[2])/3)
