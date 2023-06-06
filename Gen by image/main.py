@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.3.1
+#Version: 0.1.3.2
 
 from tkinter import *
 from PIL import Image, ImageTk
@@ -23,6 +23,7 @@ class imageProc():
         self._fileName = filename
         self._image = Image.open(filename)
         self._imageMos = None
+        self._waveImage = None
         self._lastMosN, self._lastMosM = 0, 0
     def makeSmooth(self):
         if(not self._smoothed):
@@ -164,14 +165,17 @@ class imageProc():
             self.getWaveMosaik()
         self._waveImage.save(filename)
 
-
+filename = "base.jpg"
+#filename = "Apple.png"
 proc = imageProc()
-proc.setImage("base.jpg")
-#proc.setImage("Apple.png")
+proc.setImage(filename)
 proc.makeSmooth()
 proc.saveSmooth()
 proc.getMagnifMosaik(4)
-proc.saveMosaik("baseNw.jpg")
-proc.saveSobMosaik("baseSobNw.jpg")
-proc.saveWaveMosaik("baseWave.jpg")
+proc.saveMosaik()
+proc.saveSobMosaik()
+proc.saveWaveMosaik()
+wave = proc.getWaveMosaik()
+proc.setImage("WaveMos_"+filename)
+proc.makeSmooth()
 proc.getWaveMosaik().show()
