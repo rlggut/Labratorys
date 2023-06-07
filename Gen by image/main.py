@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.3.2
+#Version: 0.1.3.3
 
 from tkinter import *
 from PIL import Image, ImageTk
@@ -25,14 +25,16 @@ class imageProc():
         self._imageMos = None
         self._waveImage = None
         self._lastMosN, self._lastMosM = 0, 0
-    def makeSmooth(self):
-        if(not self._smoothed):
+    def makeSmoothMain(self, time=1):
+        for i in range(time):
             self._image = makeGaussSmooth(self._image)
         self._smoothed = True
-    def saveSmooth(self):
+    def wasMainSmooth(self):
+        return self._smoothed
+    def saveSmooth(self, time=1):
         filename= "Smooth_"+self._fileName
         if(not self._smoothed):
-            self.makeSmooth()
+            self.makeSmoothMain(time)
         self._image.save(filename)
 
     def createMosaik(self, n=25, m=25):
@@ -144,7 +146,7 @@ class imageProc():
                         image.putpixel((pixels[i][0] - left, pixels[i][1] - upper),(int(r),int(g),int(b)))
                     images.append([image,left,upper,n])
         image = Image.new("RGB", (self._waveImage.width, self._waveImage.height), "white")
-        print(len(images))
+        print("Количество областей в волновом алгоритме: ",len(images))
         for i in range(len(images)):
             im = images[i][0]
             x, y = images[i][1], images[i][2]
@@ -164,18 +166,21 @@ class imageProc():
         if not(self._waveImage):
             self.getWaveMosaik()
         self._waveImage.save(filename)
+    def smoothWaveMosaik(self, time=1):
+        for i in range(time):
+            self._waveImage = makeGaussSmooth(self._waveImage)
+    def getSmoothWaving(self, time=1):
+        self.smoothWaveMosaik(time)
+        return self._waveImage
 
 filename = "base.jpg"
 #filename = "Apple.png"
 proc = imageProc()
 proc.setImage(filename)
-proc.makeSmooth()
+proc.makeSmoothMain(2)
 proc.saveSmooth()
 proc.getMagnifMosaik(4)
 proc.saveMosaik()
 proc.saveSobMosaik()
 proc.saveWaveMosaik()
-wave = proc.getWaveMosaik()
-proc.setImage("WaveMos_"+filename)
-proc.makeSmooth()
-proc.getWaveMosaik().show()
+proc.smoothWaveMosaik(2)
