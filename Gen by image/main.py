@@ -1,8 +1,10 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.3.3
+#Version: 0.1.3.4
 
 from tkinter import *
+
+import PIL.Image
 from PIL import Image, ImageTk
 import sys
 import os
@@ -14,14 +16,21 @@ class imageProc():
         self._image = Image.new("RGB", (256, 256), "white")
         self._imageMos = None
         self._waveImage = None
-        self._matrX, self._matrY = Matrix(3, 3), Matrix(3, 3)
-        self._matrX.setSobelX()
-        self._matrY.setSobelY()
         self._smoothed = False
+        self._fileName=""
 
-    def setImage(self, filename):
-        self._fileName = filename
-        self._image = Image.open(filename)
+    def setImage(self, file, newFileName=""):
+        self._imageMos = None
+        self._waveImage = None
+        self._smoothed = False
+        if(isinstance(file,str)):
+            self._image = Image.open(file)
+            self._fileName = file
+        elif(isinstance(file,PIL.Image.Image)):
+            self._image=file.copy()
+            if(newFileName==""):
+                if(self._fileName==""): self._fileName="newPic.png"
+            else: self._fileName=newFileName
         self._imageMos = None
         self._waveImage = None
         self._lastMosN, self._lastMosM = 0, 0
@@ -31,12 +40,11 @@ class imageProc():
         self._smoothed = True
     def wasMainSmooth(self):
         return self._smoothed
-    def saveSmooth(self, time=1):
+    def saveSmoothMain(self, time=1):
         filename= "Smooth_"+self._fileName
         if(not self._smoothed):
             self.makeSmoothMain(time)
         self._image.save(filename)
-
     def createMosaik(self, n=25, m=25):
         if(n<0): n=1
         if(m<0): m=1
@@ -58,12 +66,10 @@ class imageProc():
                             self._imageMos.putpixel((x * dx + addx, y * dy + addy), (int(r), int(g), int(b)))
             self._lastMosN, self._lastMosM = n, m
     def getMosaik(self, n=-1, m=-1):
-        if(n>0 and m>0):
-            self.createMosaik(n, m)
-            self.__SobelMask()
-        if(not self._imageMos):
-            self.createMosaik(25, 25)
-            self.__SobelMask()
+        if(n<0 or m<0):
+            n, m = 25, 25
+        self.createMosaik(n, m)
+        self.__SobelMask()
         return self._imageMos
     def getMagnifMosaik(self, block=-1):
         block=int(block)
@@ -79,7 +85,9 @@ class imageProc():
         self._imageMos.save(filename)
 
     def __SobelMask(self):
-        self._sobelMosaik=maskedImageMatrix(proc.getMosaik(), self._matrX, self._matrY, 100)
+        if(not self._imageMos):
+            self.createMosaik()
+        self._sobelMosaik=maskedImageMatrix(self._imageMos, getSobelMatrX(), getSobelMatrY(), 100)
     def getSobelMosaik(self):
         if not(self._imageMos):
             self.getMosaik()
@@ -100,7 +108,7 @@ class imageProc():
         for i in range(3): proc+=abs(col1[i]-col2[i])
         return (proc<deg)
 
-    def waveMosaik(self, deg=10):
+    def __waveMosaik(self, deg=10):
         self._waveImage = self._image.copy()
         white=(255,255,255)
         images=[]
@@ -156,9 +164,9 @@ class imageProc():
                     if(image.getpixel((tx+x,ty+y))==(255,255,255)):
                         image.putpixel((tx+x,ty+y),im.getpixel((tx,ty)))
         self._waveImage = image.copy()
-    def getWaveMosaik(self):
-        if(not self._waveImage):
-            self.waveMosaik()
+    def getWaveMosaik(self, newer=False):
+        if(not self._waveImage or newer):
+            self.__waveMosaik()
         return self._waveImage
     def saveWaveMosaik(self, filename=""):
         if(filename==""):
@@ -178,9 +186,11 @@ filename = "base.jpg"
 proc = imageProc()
 proc.setImage(filename)
 proc.makeSmoothMain(2)
-proc.saveSmooth()
+proc.saveSmoothMain()
 proc.getMagnifMosaik(4)
 proc.saveMosaik()
 proc.saveSobMosaik()
 proc.saveWaveMosaik()
 proc.smoothWaveMosaik(2)
+proc.setImage(proc.getWaveMosaik())
+proc.getWaveMosaik(True).show()
