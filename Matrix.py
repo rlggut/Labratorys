@@ -144,3 +144,25 @@ class Matrix:
                    [0.013347,0.111345,0.225821,0.111345,0.013347],
                    [0.006581,0.054901,0.111345,0.054901,0.006581],
                    [0.000789,0.006581,0.013347,0.006581,0.000789]]
+
+def getPrewittMatrY():
+    matr = Matrix()
+    matr.setPrewittY()
+    return matr
+
+def getPrewittMatrX():
+    matr = Matrix()
+    matr.setPrewittX()
+    return matr
+def getSobelMatrX():
+    matr = Matrix()
+    matr.setSobelX()
+    return matr
+def getSobelMatrY():
+    matr = Matrix()
+    matr.setSobelY()
+    return matr
+def getGauss():
+    matr = Matrix()
+    matr.setGauss()
+    return matr
