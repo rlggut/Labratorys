@@ -91,3 +91,35 @@ def FFTAnalysis(AVal):
         j = i * 2
         FTvl.append(2*math.sqrt((Tmvl[j]**2) + (Tmvl[j+1]**2))/Nvl)
     return FTvl
+def findLocalMaxPoints(mas):
+    res=[]
+    for i in range(1,len(mas)-1,1):
+        if(mas[i]>mas[i-1] and mas[i]<mas[i+1]):
+            res.append((i,mas[i]))
+    return res
+def findLocalMaxPositions(mas):
+    tmp=findLocalMaxPoints(mas)
+    res=[]
+    for item in tmp:
+        res.append(item[0])
+    return res
+def compareMaximasPlaces(max1,max2, step=10):
+    comp=0
+    i,j=0,0
+    n,m=len(max1),len(max2)
+    while(i<n and j<m):
+        if(abs(max1[i]-max2[j])<=step):
+            comp+=1
+            i+=1
+            j+=1
+        elif(max1[i]>max2[j]+step):
+            j+=1
+        elif(max1[i]+step<max2[j]):
+            i+=1
+    return comp
+def compareMasForMaximasPlaces(max1, max2, proc = False, step=10):
+    max1=findLocalMaxPositions(max1)
+    max2=findLocalMaxPositions(max2)
+    tmp=compareMaximasPlaces(max1,max2,step)
+    if(proc): return (tmp*100)/min(len(max1),len(max2))
+    else: return proc

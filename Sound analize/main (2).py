@@ -1,3 +1,7 @@
+#License: CC BY
+#Roman Gutenkov, 28/05/23
+#Version: 1.0.1
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
