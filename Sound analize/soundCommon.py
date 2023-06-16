@@ -122,4 +122,4 @@ def compareMasForMaximasPlaces(max1, max2, proc = False, step=10):
     max2=findLocalMaxPositions(max2)
     tmp=compareMaximasPlaces(max1,max2,step)
     if(proc): return (tmp*100)/min(len(max1),len(max2))
-    else: return proc
+    else: return tmp
