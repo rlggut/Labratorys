@@ -157,7 +157,7 @@ class App:
         (self._nchannels, self._sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
         self.content = self.wav.readframes(self._nframes*self._nchannels)
         self.signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
-        self.signal.deleteSilence(self._framerate*100, self._silenceEdge)
+        self.signal.deleteSilence(self._framerate, 100, self._silenceEdge)
 
         self._thrSpectr2d = threading.Thread(target=self.__ThreadSpectr2d)
         self._thrSpectr2d.start()
@@ -216,7 +216,7 @@ class App:
             self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
             self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
 
-        self._spectrData = self.signal.getFutie((self._from)*self._sizeForFrame, (self._from)*self._sizeForFrame+self._furieCount)
+        self._spectrData = self.signal.getFurie((self._from) * self._sizeForFrame, (self._from) * self._sizeForFrame + self._furieCount)
         if(len(self._spectrData)!=0):
             self._spectr.setMaxAmpl(max(self._spectrData))
             self._spectr.setData(self._spectrData)

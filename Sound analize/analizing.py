@@ -12,7 +12,7 @@ wav = wave.open(filename, mode="r")
 (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
 content = wav.readframes(nframes*nchannels)
 signal = signal(chooseChannel(pointFromBuff(content,sampwidth),nchannels,1))
-signal.deleteSilence(framerate*100, silenceEdge)
+signal.deleteSilence(framerate, 100, silenceEdge)
 timeSlice=(timeSlice*framerate)//1000
 
 tmpData = signal.getData()

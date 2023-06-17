@@ -27,7 +27,7 @@ for file in fileNames:
     sign = signal(pointFromBuff(content, sampwidth))
     # отрезание тишины и получение спектрограммы
     sign.deleteSilence(framerate * 100, 900)
-    spectr.append(signal(sign.getFutie(0,1024)))
+    spectr.append(signal(sign.getFurie(0, 1024)))
     # получение значения для областей спектрограммы
     aver = spectr[len(spectr)-1].getAverZone(zone)
     maxAver = max(aver)

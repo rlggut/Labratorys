@@ -6,11 +6,11 @@ class signal():
         self._signal = data
     def getData(self):
         return self._signal
-    def deleteSilence(self, packSize = 8000,boundry = 400):
-        self._signal = deleteSilence(self._signal, packSize, 1, boundry)
+    def deleteSilence(self, framerate = 8000,chunkTime = 1, boundry = 400):
+        self._signal = deleteSilence(self._signal, framerate, chunkTime, boundry)
     def getSize(self):
         return len(self._signal)
-    def getFutie(self, startPoint=0,endPoint=-1):
+    def getFurie(self, startPoint=0, endPoint=-1):
         if(endPoint==-1):
             endPoint=len(self._signal)
         return FFTAnalysis(self._signal[startPoint:endPoint])
