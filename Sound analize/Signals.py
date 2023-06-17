@@ -1,7 +1,46 @@
 from soundCommon import *
+import os
+import wave
 class signal():
-    def __init__(self, data = []):
-        self._signal = data
+    def __init__(self, data):
+        self._signal = []
+        self._nchannels = 1
+        self._sampwidth = 2
+        self._framerate = 8000
+        if(isinstance(data,str)):
+            self.openFromFile(data)
+        elif(isinstance(data,list)):
+            self._signal = data
+    def openFromFile(self, filename=""):
+        if(os.path.isfile(filename)):
+            if(filename.count('.wav')):
+                wav = wave.open(filename, mode="r")
+                (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
+                self._nchannels = nchannels
+                self._sampwidth = sampwidth
+                self._framerate = framerate
+                content = wav.readframes(nframes * nchannels)
+                self._signal = chooseChannel(pointFromBuff(content, sampwidth), nchannels, 1)
+                wav.close()
+                return True
+        return False
+    def writeToFile(self, filename):
+        if (filename.count('.wav')):
+            wav = wave.open(filename, mode="wb")
+            wav.setparams((1,self._sampwidth,self._framerate,self.getSize()//16,"NONE","not compressed"))
+            wav.writeframes(byteArrFromPoints(self._signal,self._sampwidth))
+            wav.close()
+            return True
+        else:
+            return False
+    def getFramerate(self):
+        return self._framerate
+    def setFramerate(self, frame):
+        self._framerate = frame
+    def getSampwidth(self):
+        return self._sampwidth
+    def setSampwidth(self, samp):
+        self._sampwidth = samp
     def setData(self, data = []):
         self._signal = data
     def getData(self):

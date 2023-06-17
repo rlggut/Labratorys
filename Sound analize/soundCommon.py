@@ -10,6 +10,15 @@ def pointFromBuff(buff, sampwidth):
             pt=-(2*minusBit-pt)
         points.append(pt)
     return(points)
+def byteArrFromPoints(points, sampwidth):
+    res=[]
+    if(sampwidth==1): return points
+    for pt in points:
+        for i in range(sampwidth):
+            res.append(pt & 0xFF)
+            pt=pt>>8
+    return bytearray(res)
+
 def chooseChannel(buff=[],channelsNum=1,currentNum=1):
     res=[]
     ind=0
