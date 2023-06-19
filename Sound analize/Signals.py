@@ -27,7 +27,7 @@ class signal():
     def writeToFile(self, filename):
         if (filename.count('.wav')):
             wav = wave.open(filename, mode="wb")
-            wav.setparams((1,self._sampwidth,self._framerate,self.getSize()//16,"NONE","not compressed"))
+            wav.setparams((1,self._sampwidth,self._framerate,self.getSize()//self._sampwidth,"NONE","not compressed"))
             wav.writeframes(byteArrFromPoints(self._signal,self._sampwidth))
             wav.close()
             return True

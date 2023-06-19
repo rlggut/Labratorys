@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 1.0.1
+#Version: 1.0.3
 
 from tkinter import *
 from tkinter import ttk
