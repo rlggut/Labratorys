@@ -129,3 +129,22 @@ def compareMasForMaximasPlaces(max1, max2, proc = False, step=10):
     tmp=compareMaximasPlaces(max1,max2,step)
     if(proc): return (tmp*100)/min(len(max1),len(max2))
     else: return tmp
+def getRollingAvarage(data, nums=3):
+    res=[]
+    sum=0
+    for i in range(min(nums, len(data))):
+        sum=sum+data[i]/min(nums, len(data))
+    res.append(sum)
+    for i in range(nums, len(data)):
+        sum=sum-data[i-nums]/nums+data[i]/nums
+        res.append(sum)
+    return res
+def hasMainTone(data, step=40, needAvarage=True):
+    if(needAvarage):
+        data=getRollingAvarage(data)
+    maxima = findLocalMaxPoints(data, False)
+    dividedTones=0
+    for i in range(1,len(maxima)):
+        if(abs(maxima[i]/maxima[0]-i)<step/maxima[0]):
+            dividedTones+=1
+    return (dividedTones>5)
