@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.3.4
+#Version: 0.1.3.5
 
 from tkinter import *
 
@@ -87,7 +87,7 @@ class imageProc():
     def __SobelMask(self):
         if(not self._imageMos):
             self.createMosaik()
-        self._sobelMosaik=maskedImageMatrix(self._imageMos, getSobelMatrX(), getSobelMatrY(), 100)
+        self._sobelMosaik=maskedImageMatrix(self._imageMos, getSobelMatrX(), getSobelMatrY(), 70)
     def getSobelMosaik(self):
         if not(self._imageMos):
             self.getMosaik()
@@ -96,8 +96,8 @@ class imageProc():
     def saveSobMosaik(self, filename=""):
         if(filename==""):
             filename= "SobMos_"+self._fileName
-        if not(self._imageMos):
-            self.getMosaik()
+        if not(self._sobelMosaik):
+            self.getSobelMosaik()
         self._sobelMosaik.save(filename)
     def __comparePix(self,x,y,tx,ty,deg=80):
         col1=self._waveImage.getpixel((x,y))
@@ -182,15 +182,15 @@ class imageProc():
         return self._waveImage
 
 filename = "base.jpg"
-#filename = "Apple.png"
+filename = "Apple.png"
 proc = imageProc()
 proc.setImage(filename)
 proc.makeSmoothMain(2)
 proc.saveSmoothMain()
-proc.getMagnifMosaik(4)
+proc.getMagnifMosaik(2)
 proc.saveMosaik()
 proc.saveSobMosaik()
 proc.saveWaveMosaik()
 proc.smoothWaveMosaik(2)
-proc.setImage(proc.getWaveMosaik())
-proc.getWaveMosaik(True).show()
+'''proc.setImage(proc.getWaveMosaik())
+proc.getWaveMosaik(True).show()'''
