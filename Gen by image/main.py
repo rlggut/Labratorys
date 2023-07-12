@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.1.3.5
+#Version: 0.1.3.6
 
 from tkinter import *
 
@@ -84,10 +84,13 @@ class imageProc():
             self.getMosaik()
         self._imageMos.save(filename)
 
+    def __delGlitch(self):
+        self._sobelMosaik=delBorderGlitch(self._sobelMosaik, 3, 5)
     def __SobelMask(self):
         if(not self._imageMos):
             self.createMosaik()
         self._sobelMosaik=maskedImageMatrix(self._imageMos, getSobelMatrX(), getSobelMatrY(), 70)
+        self.__delGlitch()
     def getSobelMosaik(self):
         if not(self._imageMos):
             self.getMosaik()
@@ -182,7 +185,7 @@ class imageProc():
         return self._waveImage
 
 filename = "base.jpg"
-filename = "Apple.png"
+#filename = "Apple.png"
 proc = imageProc()
 proc.setImage(filename)
 proc.makeSmoothMain(2)
