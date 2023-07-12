@@ -52,6 +52,20 @@ def maskedImageMatrix(image, matrX, matrY, edge):
             if(degree> edge):
                 res.putpixel((x,y), (255,255,255))
     return res
+def delBorderGlitch(image, n=3, edge=3):
+    res = Image.new('RGB', (image.width, image.height), (0,0,0))
+    delt=(n-1)//2
+    for y in range(delt,image.height-delt):
+        for x in range(delt,image.width-delt):
+            dt = 0
+            for j in range(-delt,delt+1):
+                for i in range(-delt,delt+1):
+                    value = image.getpixel((x+i, y+j))
+                    if(value==(255,255,255)):
+                        dt+=1
+            if(dt> edge):
+                res.putpixel((x,y), (255,255,255))
+    return res
 
 def compareImage(image1, image2):
     if not(isinstance(image1, Image.Image)):

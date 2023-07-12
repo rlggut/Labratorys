@@ -144,6 +144,12 @@ class Matrix:
                    [0.013347,0.111345,0.225821,0.111345,0.013347],
                    [0.006581,0.054901,0.111345,0.054901,0.006581],
                    [0.000789,0.006581,0.013347,0.006581,0.000789]]
+    def setAllOne(self, n=3):
+        self.n=n
+        self.m=n
+        for y in range(n):
+            for x in range(n):
+                self.__setIElem(x,y,1)
 
 def getPrewittMatrY():
     matr = Matrix()
@@ -165,4 +171,8 @@ def getSobelMatrY():
 def getGauss():
     matr = Matrix()
     matr.setGauss()
+    return matr
+def getOneForAll(n=3):
+    matr = Matrix()
+    matr.setAllOne()
     return matr
