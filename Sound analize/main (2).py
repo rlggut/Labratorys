@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 1.0.3
+#Version: 1.0.4.0
 
 from tkinter import *
 from tkinter import ttk
@@ -33,7 +33,7 @@ class App:
         self.frame.grid()
 
         self.filename = "sample.wav"
-        self.signal = signal()
+        self._signal = signal()
         self.__getData()
 
         self.btnFileOrig = Button(self.frame, text="Выбрать файл", command=self.__clickedLoadingOrig)
@@ -156,8 +156,8 @@ class App:
         self.wav = wave.open(self.filename, mode="r")
         (self._nchannels, self._sampwidth, self._framerate, self._nframes, comptype, compname) = self.wav.getparams()
         self.content = self.wav.readframes(self._nframes*self._nchannels)
-        self.signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
-        self.signal.deleteSilence(self._framerate, 100, self._silenceEdge)
+        self._signal = signal(chooseChannel(pointFromBuff(self.content, self._sampwidth),self._nchannels,1))
+        self._signal.deleteSilence(self._framerate, 100, self._silenceEdge)
 
         self._thrSpectr2d = threading.Thread(target=self.__ThreadSpectr2d)
         self._thrSpectr2d.start()
@@ -165,7 +165,7 @@ class App:
         self._timePerImage = 50
         self._frameImage = 4
         self._sizeForFrame = ((self._timePerImage * self._framerate) // 1000)
-        self._time = (self.signal.getSize()*1000) // self._framerate
+        self._time = (self._signal.getSize()*1000) // self._framerate
         self._numsOfFrames = math.ceil(self._time // self._timePerImage)
         self._from = 0
         #self.__ThreadOscill()
@@ -176,7 +176,7 @@ class App:
     def __ThreadOscill(self):
         self.oscillReady = False
         self._signalWgt = signalwidget(self._framerate, self._sampwidth, 1024, self._timePerImage, self._frameImage)
-        self._signalWgt.setData(self.signal)
+        self._signalWgt.setData(self._signal)
         if(not self._reload):
             self.imageOscill = self._signalWgt.getImage(0).resize((self.canvasW, self.canvasH))
             draw = ImageDraw.Draw(self.imageOscill)
@@ -191,7 +191,7 @@ class App:
 
     def __ThreadSpectr2d(self):
         self.sptr2D = spectr2D(self._framerate)
-        self.sptr2D.setData(self.signal.getData())
+        self.sptr2D.setData(self._signal.getData())
         if(not self._reload):
             image = self.sptr2D.getImage()
             self._kfSpctr2D = (self.canvasW // 2) / image.width
@@ -216,7 +216,7 @@ class App:
             self.photoOscill = ImageTk.PhotoImage(self.imageOscill)
             self.с_imageOscl = self.canvasOscill.create_image(0, 0, anchor='nw', image=self.photoOscill)
 
-        self._spectrData = self.signal.getFurie((self._from) * self._sizeForFrame, (self._from) * self._sizeForFrame + self._furieCount)
+        self._spectrData = self._signal.getFurie((self._from) * self._sizeForFrame, (self._from) * self._sizeForFrame + self._furieCount)
         if(len(self._spectrData)!=0):
             self._spectr.setMaxAmpl(max(self._spectrData))
             self._spectr.setData(self._spectrData)

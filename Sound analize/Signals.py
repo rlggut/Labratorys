@@ -2,7 +2,7 @@ from soundCommon import *
 import os
 import wave
 class signal():
-    def __init__(self, data):
+    def __init__(self, data=[]):
         self._signal = []
         self._nchannels = 1
         self._sampwidth = 2

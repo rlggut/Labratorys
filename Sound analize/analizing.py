@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 16/05/23
-#Version: 1.0.4
+#Version: 1.0.4.0
 
 import wave
 from Signals import *
