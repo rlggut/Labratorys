@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.0.0
+#Version: 0.0.1
 
 from tkinter import *
 
@@ -12,12 +12,23 @@ sys.path.append(os.path.join(sys.path[0], '..')) #path to https://github.com/rlg
 from Matrix import *
 from ImageProcess import *
 
-class imageAnalizer():
+class matrixing():
     def __init__(self):
+        self._matrX = Matrix()
+        self._matrX.setSobelX()
+        self._matrY = Matrix()
+        self._matrY.setSobelY()
+
+        self._rate = 1
+    def __str__(self):
+        return "[Matrix X]:\n"+str(self._matrX)+"\n\n[Matrix Y]:\n"+str(self._matrY)
+class imageAnalizer():
+    def __init__(self, matr=matrixing()):
         self._image = Image.new("RGB", (256, 256), "white")
         self._fileName=""
+        self._matr = matr
 
-    def setImage(self, file, newFileName=""):
+    def analizeImage(self, file, newFileName=""):
         if(isinstance(file,str)):
             self._image = Image.open(file)
             self._fileName = file
@@ -26,10 +37,13 @@ class imageAnalizer():
             if(newFileName==""):
                 if(self._fileName==""): self._fileName="newPic.png"
             else: self._fileName=newFileName
+    def getMatrix(self):
+        print(self._matr)
 
 filename = "base.jpg"
 analizer = imageAnalizer()
-analizer.setImage(filename)
+analizer.analizeImage(filename)
+analizer.getMatrix()
 
 print("End of Work")
 
