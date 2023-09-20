@@ -33,8 +33,6 @@ def maskedImageMatrix(image, matrX, matrY, edge):
         return False
     if(matrX.getM()!=matrX.getN()):
         return False
-    if(matrX.getN()%2==0):
-        return False
     res = Image.new('RGB', (image.width, image.height), (0,0,0))
     delt=(matrX.getN()-1)//2
     for y in range(delt,image.height-delt):
@@ -49,9 +47,31 @@ def maskedImageMatrix(image, matrX, matrY, edge):
                     gX += matrX.getMatrXY(i+1,j+1)*value
                     gY += matrY.getMatrXY(i+1,j+1)*value
             degree=pow(gX*gX+gY*gY,0.5)
-            if(degree> edge):
+            if(degree > edge):
                 res.putpixel((x,y), (255,255,255))
     return res
+
+def countMatrixGrad(image, matr, edge=100):
+    count = 0
+    if not(isinstance(image, Image.Image)):
+        return -1
+    if not(isinstance(matr, Matrix)):
+        return -1
+    if(matr.getN()!=matr.getN()):
+        return -1
+    delt=(matr.getN()-1)//2
+    for y in range(delt,image.height-delt):
+        for x in range(delt,image.width-delt):
+            degree = 0
+            for j in range(-delt,delt+1):
+                for i in range(-delt,delt+1):
+                    value = image.getpixel((x+i, y+j))
+                    if(isinstance(value,tuple)):
+                        value=((value[0]+value[1]+value[2])/3)
+                    degree += matr.getMatrXY(i+1,j+1)*value
+            if(degree > edge):
+                count+=1
+    return count
 def delBorderGlitch(image, n=3, edge=3):
     res = Image.new('RGB', (image.width, image.height), (0,0,0))
     delt=(n-1)//2
