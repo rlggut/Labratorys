@@ -37,6 +37,7 @@ class imageAnalizer():
             if(newFileName==""):
                 if(self._fileName==""): self._fileName="newPic.png"
             else: self._fileName=newFileName
+        print(countMatrixGrad(self._image,[getSobelMatrX(),getOneForAll()],100))
     def getMatrix(self):
         print(self._matr)
 
@@ -46,4 +47,6 @@ analizer.analizeImage(filename)
 analizer.getMatrix()
 
 print("End of Work")
+
+lt=[1,1,1]
 

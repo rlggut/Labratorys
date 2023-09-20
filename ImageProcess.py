@@ -52,26 +52,42 @@ def maskedImageMatrix(image, matrX, matrY, edge):
     return res
 
 def countMatrixGrad(image, matr, edge=100):
-    count = 0
+    n = 0
+    res = 0
     if not(isinstance(image, Image.Image)):
         return -1
     if not(isinstance(matr, Matrix)):
-        return -1
-    if(matr.getN()!=matr.getN()):
-        return -1
-    delt=(matr.getN()-1)//2
-    for y in range(delt,image.height-delt):
-        for x in range(delt,image.width-delt):
-            degree = 0
-            for j in range(-delt,delt+1):
-                for i in range(-delt,delt+1):
-                    value = image.getpixel((x+i, y+j))
-                    if(isinstance(value,tuple)):
-                        value=((value[0]+value[1]+value[2])/3)
-                    degree += matr.getMatrXY(i+1,j+1)*value
-            if(degree > edge):
-                count+=1
-    return count
+        if not(isinstance(matr,list)):
+            return -1
+        else:
+            for i in range(len(matr)):
+                if not (isinstance(matr[i], Matrix)):
+                    return -1
+            lt=matr
+            n = len(lt)-1
+            matr=lt[0]
+            res=[]
+    for i in range(n+1):
+        if(n!=0):
+            matr=lt[i]
+        if(matr.getN()!=matr.getN()):
+            return -1
+        delt=(matr.getN()-1)//2
+        count = 0
+        for y in range(delt,image.height-delt):
+            for x in range(delt,image.width-delt):
+                degree = 0
+                for j in range(-delt,delt+1):
+                    for i in range(-delt,delt+1):
+                        value = image.getpixel((x+i, y+j))
+                        if(isinstance(value,tuple)):
+                            value=((value[0]+value[1]+value[2])/3)
+                        degree += matr.getMatrXY(i+1,j+1)*value
+                if(degree > edge):
+                    count+=1
+        if(n==0): res=count
+        else: res.append(count)
+    return res
 def delBorderGlitch(image, n=3, edge=3):
     res = Image.new('RGB', (image.width, image.height), (0,0,0))
     delt=(n-1)//2
