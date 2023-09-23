@@ -46,7 +46,7 @@ class Matrix:
         res=Matrix(self.n, self.m)
         for j in range(self.m):
             for i in range(self.n):
-                res.__setIElem(i, j, self.matr[i][j] + other.matr[i][j])
+                res.__setIElem(i, j, self.matr[j][i] + other.matr[j][i])
         return res
     def __sub__(self, other):
         return(self+(-1)*other)
@@ -96,7 +96,7 @@ class Matrix:
                 if(len(data[j])<=i):
                     self.__setIElem(i, j, 0)
                 else:
-                    self.__setIElem(i, j, data[i][j])
+                    self.__setIElem(i, j, data[j][i])
         return self
     def getMatrXY(self,x,y):
         if(x<0):
