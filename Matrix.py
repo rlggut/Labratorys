@@ -20,7 +20,7 @@ class Matrix:
         res=""
         for j in range(self.m):
             for i in range(self.n):
-                res += str(self.matr[i][j])+ " "
+                res += str(self.matr[j][i])+ " "
             if(j!=self.m-1):
                 res+='\n'
         return res
