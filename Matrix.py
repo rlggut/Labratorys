@@ -39,6 +39,8 @@ class Matrix:
     def __len__(self):
         return(min(self.n,self.m))
     def __add__(self, other):
+        if not (isinstance(other, Matrix)):
+            return False
         if(self.n!=other.n):
             return self
         if(self.m!=other.m):
@@ -52,24 +54,22 @@ class Matrix:
         return(self+(-1)*other)
     def __rmul__(self, other):
         res=Matrix(self.m,self.n)
-        if not(isinstance(other, int)):
-            return False
+        if not(isinstance(other, int)) and not(isinstance(other, float)):
+            if not (isinstance(other, Matrix)):
+                return False
+            if (self.n != other.m):
+                return False
+            res = Matrix(other.n, self.m)
+            for j in range(self.m):
+                for i in range(other.n):
+                    elemRes = 0
+                    for k in range(self.n):
+                        elemRes += self.matr[k][j] * other.matr[i][k]
+                    res.__setIElem(i, j, elemRes)
+            return res
         for y in range(self.m):
             for x in range(self.n):
                 res.matr[x][y]=self.matr[x][y]*other
-        return res
-    def __mul__(self, other):
-        if not(isinstance(other, Matrix)):
-            return False
-        if (self.n != other.m):
-            return False
-        res = Matrix(other.n, self.m)
-        for j in range(self.m):
-            for i in range(other.n):
-                elemRes=0
-                for k in range(self.n):
-                    elemRes+=self.matr[k][j]*other.matr[i][k]
-                res.__setIElem(i, j, elemRes)
         return res
     def __setIElem(self, x, y, data):
         if not(isinstance(x, int)):
