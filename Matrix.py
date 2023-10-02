@@ -115,6 +115,30 @@ class Matrix:
             for x in range(self.x):
                 res+=self.matr[y][x]*other[y][x]
         return res
+    def normalY(self, y=0):
+        if y<0 or y>=self.y: return False
+        mx=0
+        for x in range(self.x):
+            mx+=abs(self.matr[y][x])
+        return mx
+    def normalX(self, x=0):
+        if x<0 or x>=self.x: return False
+        mx=0
+        for y in range(self.y):
+            mx+=abs(self.matr[y][x])
+        return mx
+    def normalizedY(self):
+        mx=0
+        for y in range(self.y):
+            mx = max(mx, self.normalY(y))
+        if (mx == 0): mx = 1
+        self.matr = (self.__rmul__(1/mx)).matr
+    def normalizedX(self):
+        mx=0
+        for x in range(self.x):
+            mx = max(mx, self.normalX(x))
+        if (mx == 0): mx = 1
+        self.matr = (self.__rmul__(1/mx)).matr
     def setSobelX(self):
         self.y=3
         self.x=3
