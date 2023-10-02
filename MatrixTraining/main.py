@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.2.0
+#Version: 0.2.1
 
 from tkinter import *
 
@@ -48,17 +48,17 @@ class imageAnalizer():
                 if(self._fileName==""): self._fileName="newPic.png"
             else: self._fileName=newFileName
         matrUD=Matrix(3,3)
-        matrUD.setData([[1,0,0],
+        matrUD.setData([[-1,0,0],
                         [0,0,0],
-                        [0,0,-1]])
+                        [0,0,1]])
         matrL=Matrix(3,3)
         matrL.setData([[0,0,0],
-                       [1,0,-1],
+                       [-1,0,1],
                        [0,0,0]])
         matrDU=Matrix(3,3)
-        matrDU.setData([[0,0,-1],
+        matrDU.setData([[0,0,1],
                         [0,0,0],
-                        [1,0,0]])
+                        [-1,0,0]])
         tmp=countMatrixGrad(self._image,[matrUD,matrL,matrDU],self._scale )
         print('Кол-во совпадений:',tmp)
         mx=tmp.index(max(tmp))
@@ -76,7 +76,13 @@ class imageAnalizer():
             res[mx]=0
             res[mn]=0
         addMatr = self._matr.getRate() * (res[0] * matrUD + res[1] * matrL + res[2] * matrDU)
+        addMatr.normalizedX()
+        #print(addMatr)
+        #print("+")
+        #print(self._matr._matrX)
         self._matr._matrX = self._matr._matrX + addMatr
+        #print("=")
+        #print(self._matr._matrX)
         self._matr.cutRate()
     def getMatrix(self):
         print('Расчетная матрица:')
