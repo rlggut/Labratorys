@@ -27,11 +27,7 @@ def maskedImageMatrix(image, matrX, matrY, edge):
         return False
     if not(isinstance(matrY, Matrix)):
         return False
-    if(matrX.getN()!=matrY.getN()):
-        return False
-    if(matrX.getM()!=matrY.getM()):
-        return False
-    if(matrX.getM()!=matrX.getN()):
+    if(matrX.getN()!=matrY.getN() or (matrX.getM()!=matrY.getM()) or (matrX.getM()!=matrX.getN())):
         return False
     res = Image.new('RGB', (image.width, image.height), (0,0,0))
     delt=(matrX.getN()-1)//2
