@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.2.3
+#Version: 0.2.5
 
 from tkinter import *
 
@@ -29,6 +29,11 @@ class matrixing():
     def cutRate(self,n=2):
         if(n<=0): n = 2
         self._rate /= n
+    def getMatrX(self):
+        return self._matrX
+    def getMatrY(self):
+        return self._matrY
+
 class imageAnalizer():
     def __init__(self, matr=matrixing()):
         self._image = Image.new("RGB", (256, 256), "white")
@@ -108,7 +113,6 @@ class imageAnalizer():
             res[mn]=0
         print('Усредненные коэффициенты по градиентам: ', res)
 
-
         addMatrX = self._matr.getRate() * (res[0] * matrUD + res[1] * matrL + res[2] * matrDU)
         addMatrX.normalizedX()
         addMatrY = self._matr.getRate() * (res[0] * matrUD + res[1] * matrU + res[2] * matrRL)
@@ -120,6 +124,11 @@ class imageAnalizer():
     def getMatrix(self):
         print('Расчетные матрицы:')
         print(self._matr)
+    def getMatrX(self):
+        return self._matr.getMatrX()
+    def getMatrY(self):
+        return self._matr.getMatrY()
+
 
 
 trainingImages = []
@@ -138,5 +147,11 @@ analizer.setScale(20)
 for image in trainingImages:
     analizer.analizeImage(image)
 analizer.getMatrix()
+
+for image in trainingImages:
+    fileIM = Image.open(image)
+    fileIM = maskedImageMatrix(fileIM,analizer.getMatrX(),analizer.getMatrY(),100)
+    fileIM.save(image[:-4]+"_edgeNW.png")
+
 print("End of Work")
 
