@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.2.2
+#Version: 0.2.3
 
 from tkinter import *
 
@@ -109,15 +109,21 @@ class imageAnalizer():
         print(self._matr)
 
 
-analizer = imageAnalizer()
-analizer.setScale(20)
+trainingImages = []
+comparedImages = []
 files = os.listdir("pics")
 for file in files:
     if(file.count("edge")==0):
         file_pair = "pics/"+(file[:-4]+"_edge.png")
         if(os.path.isfile(file_pair)):
             filename = "pics/"+file
-            analizer.analizeImage(filename)
+            trainingImages.append(filename)
+            comparedImages.append(file_pair)
+
+analizer = imageAnalizer()
+analizer.setScale(20)
+for image in trainingImages:
+    analizer.analizeImage(image)
 analizer.getMatrix()
 print("End of Work")
 
