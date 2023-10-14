@@ -109,7 +109,7 @@ def compareImage(image1, image2):
     diffNums = 0
     for y in range(height):
         for x in range(width):
-            if(image1.getpixel((x,y))!=image2.getpixel((x,y))):
+            if(image1.getpixel((x,y))[:3]!=image2.getpixel((x,y))[:3]):
                 diffNums+=1
     return diffNums
 
