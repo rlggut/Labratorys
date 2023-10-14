@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.2.5
+#Version: 0.3.0
 
 from tkinter import *
 
@@ -130,7 +130,6 @@ class imageAnalizer():
         return self._matr.getMatrY()
 
 
-
 trainingImages = []
 comparedImages = []
 files = os.listdir("pics")
@@ -152,6 +151,7 @@ for image in trainingImages:
     fileIM = Image.open(image)
     fileIM = maskedImageMatrix(fileIM,analizer.getMatrX(),analizer.getMatrY(),100)
     fileIM.save(image[:-4]+"_edgeNW.png")
+    fileComp = Image.open(image[:-4]+"_edge.png")
+    print("Разница для изображения " + image + " = " + str(compareImage(fileIM,fileComp)))
 
 print("End of Work")
-
