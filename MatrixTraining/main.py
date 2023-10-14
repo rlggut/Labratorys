@@ -89,12 +89,25 @@ class imageAnalizer():
         if(tmp[mid]-tmp[mn]<0.1*tmp[mid]): tmp[mn]=tmp[mid]
         res=[1,1,1]
         if(tmp[mn]>0):
-            res[mid]=math.ceil(tmp[mid] / tmp[mn])
+            minDt = 10
+            res[mid] = math.ceil(tmp[mid] / tmp[mn])
             res[mx] = math.ceil(tmp[mx] / tmp[mn])
+            for i in range(1,10):
+                for j in range(i,10):
+                    for k in range(j,10):
+                        dt = abs(j/i - tmp[mid]/tmp[mn])
+                        dt += abs(k/i - tmp[mx]/tmp[mn])
+                        if(dt<minDt):
+                            res[mn] = i
+                            res[mid] = j
+                            res[mx] = k
+                            minDt = dt
         else:
             res[mid]=0
             res[mx]=0
             res[mn]=0
+        print('Усредненные коэффициенты по градиентам: ', res)
+
 
         addMatrX = self._matr.getRate() * (res[0] * matrUD + res[1] * matrL + res[2] * matrDU)
         addMatrX.normalizedX()
