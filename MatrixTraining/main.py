@@ -1,6 +1,6 @@
 #License: CC BY
 #Roman Gutenkov, 28/05/23
-#Version: 0.3.0
+#Version: 0.3.1
 
 from tkinter import *
 
@@ -37,6 +37,7 @@ class matrixing():
 class imageAnalizer():
     def __init__(self, matr=matrixing()):
         self._image = Image.new("RGB", (256, 256), "white")
+        self._pathImages=""
         self._fileName=""
         self._matr = matr
         self._scale = 100
@@ -121,6 +122,39 @@ class imageAnalizer():
         self._matr._matrX = self._matr._matrX + addMatrX
         self._matr._matrY = self._matr._matrY + addMatrY
         self._matr.cutRate()
+    def setImagePath(self, path="pics"):
+        self._pathImages = path
+        self._trainingImages = []
+        self._comparedImages = []
+        if not(os.path.isdir(path)):
+            return
+        files = os.listdir(path)
+        for file in files:
+            if (file.count("edge") == 0):
+                file_pair = "pics/" + (file[:-4] + "_edge.png")
+                if (os.path.isfile(file_pair)):
+                    filename = "pics/" + file
+                    self._trainingImages.append(filename)
+                    self._comparedImages.append(file_pair)
+    def trainFromPath(self, path=-1):
+        if(path==-1):
+            if(self._pathImages==""):
+                self.setImagePath()
+        else:
+            if(isinstance(path, str)):
+                self.setImagePath(path)
+            else:
+                if (self._pathImages == ""):
+                    self.setImagePath()
+        for image in self._trainingImages:
+            self.analizeImage(image)
+    def comparedAll(self):
+        for i in range(len(self._trainingImages)):
+            fileIM = Image.open(self._trainingImages[i])
+            fileIM = maskedImageMatrix(fileIM, analizer.getMatrX(), analizer.getMatrY(), 100)
+            fileIM.save(self._trainingImages[i][:-4] + "_edgeNW.png")
+            fileComp = Image.open(self._comparedImages[i])
+            print("Разница для изображения " + self._trainingImages[i] + " = " + str(compareImage(fileIM, fileComp)))
     def getMatrix(self):
         print('Расчетные матрицы:')
         print(self._matr)
@@ -130,28 +164,12 @@ class imageAnalizer():
         return self._matr.getMatrY()
 
 
-trainingImages = []
-comparedImages = []
-files = os.listdir("pics")
-for file in files:
-    if(file.count("edge")==0):
-        file_pair = "pics/"+(file[:-4]+"_edge.png")
-        if(os.path.isfile(file_pair)):
-            filename = "pics/"+file
-            trainingImages.append(filename)
-            comparedImages.append(file_pair)
+
 
 analizer = imageAnalizer()
 analizer.setScale(20)
-for image in trainingImages:
-    analizer.analizeImage(image)
+analizer.trainFromPath("pics")
 analizer.getMatrix()
-
-for image in trainingImages:
-    fileIM = Image.open(image)
-    fileIM = maskedImageMatrix(fileIM,analizer.getMatrX(),analizer.getMatrY(),100)
-    fileIM.save(image[:-4]+"_edgeNW.png")
-    fileComp = Image.open(image[:-4]+"_edge.png")
-    print("Разница для изображения " + image + " = " + str(compareImage(fileIM,fileComp)))
+analizer.comparedAll()
 
 print("End of Work")
