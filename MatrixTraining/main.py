@@ -15,12 +15,9 @@ from ImageProcess import *
 
 class matrixing():
     def __init__(self):
-        self._matrX = Matrix()
-        self._matrX.setSobelX()
-        self._matrY = Matrix()
-        self._matrY.setSobelY()
-
-        self._rate = 0.5
+        self._matrX = getPrewittMatrX()
+        self._matrY = getPrewittMatrY()
+        self._rate = 2
     def __str__(self):
         return "[Matrix X]:\n"+str(self._matrX)+"\n\n[Matrix Y]:\n"+str(self._matrY)
 
@@ -41,6 +38,9 @@ class imageAnalizer():
         self._fileName=""
         self._matr = matr
         self._scale = 100
+        self._needLog = True
+    def setNeedLog(self, log=True):
+        self._needLog = log
     def setScale(self, sc):
         self._scale = sc
 
@@ -68,7 +68,7 @@ class imageAnalizer():
                         [-1,0,0]])
         self._image = self._image.convert("L")
         tmpX=countMatrixGrad(self._image,[matrUD,matrL,matrDU],self._scale)
-        print('Кол-во совпадений векторов градиента по X: ', tmpX)
+        if(self._needLog): print('Кол-во совпадений векторов градиента по X: ', tmpX)
 
         # Подсчет для направления по оси Y
         matrU=Matrix(3,3)
@@ -81,7 +81,7 @@ class imageAnalizer():
                         [1,0,0]])
         self._image = self._image.convert("L")
         tmpY=countMatrixGrad(self._image,[matrUD,matrU,matrRL],self._scale)
-        print('Кол-во совпадений векторов градиента по Y: ',tmpY)
+        if(self._needLog): print('Кол-во совпадений векторов градиента по Y: ',tmpY)
         # Усреднение, чтобы матрицы были эквивалентными
         tmp = []
         for i in range(3):
@@ -112,16 +112,16 @@ class imageAnalizer():
             res[mid]=0
             res[mx]=0
             res[mn]=0
-        print('Усредненные коэффициенты по градиентам: ', res)
+        if(self._needLog): print('Усредненные коэффициенты по градиентам: ', res)
 
-        addMatrX = self._matr.getRate() * (res[0] * matrUD + res[1] * matrL + res[2] * matrDU)
-        addMatrX.normalizedX()
-        addMatrY = self._matr.getRate() * (res[0] * matrUD + res[1] * matrU + res[2] * matrRL)
-        addMatrY.normalizedY()
+        mx = max(res)
+        for i in range(len(res)):
+            res[i] = res[i]/mx
+        self._addMatrX = (res[0] * matrUD + res[1] * matrL + res[2] * matrDU)
+        #self._addMatrX.normalizedX()
+        self._addMatrY = (res[0] * matrUD + res[1] * matrU + res[2] * matrRL)
+        #self._addMatrY.normalizedY()
 
-        self._matr._matrX = self._matr._matrX + addMatrX
-        self._matr._matrY = self._matr._matrY + addMatrY
-        self._matr.cutRate()
     def setImagePath(self, path="pics"):
         self._pathImages = path
         self._trainingImages = []
@@ -146,15 +146,49 @@ class imageAnalizer():
             else:
                 if (self._pathImages == ""):
                     self.setImagePath()
+        minDt = self.comparedAll()
+        if (self._needLog): print("Расчетное базовое отклонение: " + str(minDt))
         for image in self._trainingImages:
+            if (self._needLog):
+                print("Следующее изображение: ", image)
             self.analizeImage(image)
-    def comparedAll(self):
+            kf = self._matr.getRate()
+            step = 0
+            self.getMatrix()
+            while(step<4):
+                matrX = self._matr._matrX + kf * self._addMatrX
+                matrY = self._matr._matrY + kf * self._addMatrY
+                if (self._needLog):
+                    print("Добавочная матрица по оси Y")
+                    print(kf * self._addMatrY)
+                dt = self.comparedAll(matrX,matrY)
+                if(dt>minDt):
+                    kf = kf/2
+                    matrX = self._matr._matrX + kf * self._addMatrX
+                    matrY = self._matr._matrY + kf * self._addMatrY
+                else:
+                    minDt=dt
+                    if(self._needLog): print("Обновление минимального отклонения: "+str(minDt))
+                    self._matr._matrX = self._matr._matrX + kf * self._addMatrX
+                    self._matr._matrY = self._matr._matrY + kf * self._addMatrY
+                    break
+                step+=1
+
+    def comparedAll(self,matrX="",matrY=""):
+        if (isinstance(matrX, str)):
+            matrX=self._matr._matrX
+        if (isinstance(matrY, str)):
+            matrY=self._matr._matrY
+        dt=0
         for i in range(len(self._trainingImages)):
             fileIM = Image.open(self._trainingImages[i])
-            fileIM = maskedImageMatrix(fileIM, analizer.getMatrX(), analizer.getMatrY(), 100)
+            fileIM = maskedImageMatrix(fileIM, matrX, matrY, 100)
             fileIM.save(self._trainingImages[i][:-4] + "_edgeNW.png")
             fileComp = Image.open(self._comparedImages[i])
-            print("Разница для изображения " + self._trainingImages[i] + " = " + str(compareImage(fileIM, fileComp)))
+            add = compareImage(fileIM, fileComp)
+            dt = dt + add
+            if(self._needLog): print("Разница для изображения " + self._trainingImages[i] + " = " + str(add))
+        return dt
     def getMatrix(self):
         print('Расчетные матрицы:')
         print(self._matr)
@@ -162,8 +196,6 @@ class imageAnalizer():
         return self._matr.getMatrX()
     def getMatrY(self):
         return self._matr.getMatrY()
-
-
 
 
 analizer = imageAnalizer()
