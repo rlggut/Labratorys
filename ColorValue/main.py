@@ -12,7 +12,7 @@ class App:
     def __init__(self):
         self.window = Tk()
         self.window.title("Исследование градаций серого")
-        self.canvasW = 200
+        self.canvasW = 300
         self.canvasH = 200
         size=str(int(self.canvasW*3.1))+"x"+str(int(self.canvasH *1.25))
         self.window.geometry(size)
@@ -62,12 +62,16 @@ class App:
     def __getGrey(self):
         res = self.image.convert("L")
         return res
+    def __FsRGB(self, value):
+        return int(value[0]*0.2126+value[1]*0.7152+value[2]*0.0722)
+    def __funcGreen(self, value):
+        return int(value[0]*0.05+value[1]*0.9+value[2]*0.05)
     def __getGreyOwn(self):
         res = Image.new('RGB', (self.image.width, self.image.height), (0,0,0))
         for y in range(self.image.height):
             for x in range(self.image.width):
                 value = self.image.getpixel((x,y))
-                greyCol = int(value[0]*0.3+value[1]*0.59+value[2]*0.11)
+                greyCol = self.__FsRGB(value)
                 res.putpixel((x,y), (greyCol,greyCol,greyCol))
         return res
 
