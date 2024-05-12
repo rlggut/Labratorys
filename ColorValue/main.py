@@ -14,7 +14,7 @@ class App:
         self.window.title("Исследование градаций серого")
         self.canvasW = 300
         self.canvasH = 200
-        size=str(int(self.canvasW*3.1))+"x"+str(int(self.canvasH *1.25))
+        size=str(int(self.canvasW*3.1))+"x"+str(int(self.canvasH * 2.25))
         self.window.geometry(size)
         self.frame = Frame(self.window)
         self.frame.grid()
@@ -29,7 +29,7 @@ class App:
         self.lblChoosed.grid(column=4, row=0, columnspan=3)
         self.filename = ""
 
-        self.canvas = Canvas(self.window, height=1.1*self.canvasH, width=3 * self.canvasW+3)
+        self.canvas = Canvas(self.window, height=2.1*self.canvasH, width=3 * self.canvasW+3)
         self.с_image = self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
         self.canvas.grid(column=0, row=1,columnspan=5)
 
@@ -56,9 +56,19 @@ class App:
         self.photoGrey = ImageTk.PhotoImage(self.imageGrey)
         self.с_imageGrey = self.canvas.create_image(self.canvasW+1, 0, anchor='nw', image=self.photoGrey)
 
+        self.imageGreyBound=maskedImageMatrix(self.imageGrey)
+        self.photoGreyBound = ImageTk.PhotoImage(self.imageGreyBound)
+        self.с_imageGreyBound = self.canvas.create_image(self.canvasW+1, self.canvasH+1, anchor='nw', image=self.photoGreyBound)
+
         self.imageGreyExp = self.__getGreyOwn()
         self.photoGreyExp = ImageTk.PhotoImage(self.imageGreyExp)
         self.с_imageGreyExp = self.canvas.create_image(2*self.canvasW+2, 0, anchor='nw', image=self.photoGreyExp)
+
+        self.imageGreyExpBound=maskedImageMatrix(self.imageGreyExp)
+        self.photoGreyExpBound = ImageTk.PhotoImage(self.imageGreyExpBound)
+        self.с_imageGreyExpBound = self.canvas.create_image(2*self.canvasW+2, self.canvasH+1, anchor='nw', image=self.photoGreyExpBound)
+        #print(compareImageProc(self.imageGreyExpBound,self.imageGreyBound))
+
     def __getGrey(self):
         res = self.image.convert("L")
         return res
