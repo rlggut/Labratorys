@@ -20,7 +20,7 @@ def makeGaussSmooth(image):
             res.putpixel((x,y),(int(r),int(g),int(b)))
     return res
 
-def maskedImageMatrix(image, matrX, matrY, edge):
+def maskedImageMatrix(image, matrX=getSobelMatrX(), matrY=getSobelMatrY(), edge=100):
     if not(isinstance(image, Image.Image)):
         return False
     if not(isinstance(matrX, Matrix)):
@@ -99,11 +99,11 @@ def delBorderGlitch(image, n=3, edge=3):
                 res.putpixel((x,y), (255,255,255))
     return res
 
-def compareImageProc(image1,image2):
+def compareImageDiffProc(image1,image2):
     res = compareImage(image1,image2)
-    if(isinstance(image1, bool)):
+    if(isinstance(res, bool)):
         return False
-    return (100 - (res*100)/min(image1.width,image2.width)*min(image1.height,image2.height))
+    return ((res*100)/min(image1.width,image2.width)*min(image1.height,image2.height))
 def compareImage(image1, image2):
     if not(isinstance(image1, Image.Image)):
         return False
