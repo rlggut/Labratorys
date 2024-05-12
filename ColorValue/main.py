@@ -64,14 +64,18 @@ class App:
         return res
     def __FsRGB(self, value):
         return int(value[0]*0.2126+value[1]*0.7152+value[2]*0.0722)
-    def __funcGreen(self, value):
-        return int(value[0]*0.05+value[1]*0.9+value[2]*0.05)
+    def __funcGreen(self, value, color=[89,142,86]):
+        m1=max(color[0],255-color[0])
+        m2=max(color[1],255-color[1])
+        m3=max(color[2],255-color[2])
+        return int((abs(value[0]-color[0])*255)/m1*0.21+(abs(value[1]-color[1])*255)/m2*0.71
+                   +(abs(value[2]-color[2])*255)/m3*0.08)
     def __getGreyOwn(self):
         res = Image.new('RGB', (self.image.width, self.image.height), (0,0,0))
         for y in range(self.image.height):
             for x in range(self.image.width):
                 value = self.image.getpixel((x,y))
-                greyCol = self.__FsRGB(value)
+                greyCol = self.__funcGreen(value)
                 res.putpixel((x,y), (greyCol,greyCol,greyCol))
         return res
 
