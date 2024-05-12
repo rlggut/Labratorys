@@ -99,6 +99,11 @@ def delBorderGlitch(image, n=3, edge=3):
                 res.putpixel((x,y), (255,255,255))
     return res
 
+def compareImageProc(image1,image2):
+    res = compareImage(image1,image2)
+    if(isinstance(image1, bool)):
+        return False
+    return (100 - (res*100)/min(image1.width,image2.width)*min(image1.height,image2.height))
 def compareImage(image1, image2):
     if not(isinstance(image1, Image.Image)):
         return False
