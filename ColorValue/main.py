@@ -33,6 +33,11 @@ class App:
         self.btnColor = Button(self.frame, text="Выбор основного цвета", command=self.__clickedColor)
         self.btnColor.grid(column=7, row=0)
         self.btnColor["state"] = "disabled"
+        self.btnSave = Button(self.frame, text="Сохранить результат", command=self.__saveBorders)
+        self.btnSave.grid(column=8, row=0)
+        self.btnSave["state"] = "disabled"
+
+
         self.color = (40, 66, 57)
         self.canvasColor = Canvas(self.window, height=15, width=45)
         self.imageColor = Image.new('RGB', (self.canvasColor.winfo_width(), self.canvasColor.winfo_height()), self.color)
@@ -80,6 +85,7 @@ class App:
         self.с_imageGreyBound = self.canvas.create_image(self.canvasW+1, self.canvasH+1, anchor='nw', image=self.photoGreyBound)
 
         self.btnColor["state"] = "normal"
+        self.btnSave["state"] = "normal"
         self.__createExpImages()
     def __createExpImages(self):
         self.imageGreyExp = self.__getGreyOwn()
@@ -89,8 +95,6 @@ class App:
         self.imageGreyExpBound=maskedImageMatrix(self.imageGreyExp)
         self.photoGreyExpBound = ImageTk.PhotoImage(self.imageGreyExpBound)
         self.с_imageGreyExpBound = self.canvas.create_image(2*self.canvasW+2, self.canvasH+1, anchor='nw', image=self.photoGreyExpBound)
-
-        self.__saveBorders()
 
     def __getGrey(self):
         res = self.image.convert("L")
@@ -104,10 +108,19 @@ class App:
         return int((abs(value[0]-color[0])*255)/m1*0.21+(abs(value[1]-color[1])*255)/m2*0.71
                    +(abs(value[2]-color[2])*255)/m3*0.08)
     def __saveBorders(self):
-        res = Image.new('RGB', (self.image.width*2+1, self.image.height), (0, 0, 0))
-        res.paste(self.imageGreyBound,(0,0))
-        res.paste(self.imageGreyExpBound,(self.image.width+1,0))
-        res.save("result.jpg")
+        filename = filedialog.asksaveasfilename(title="Сохранить результат",
+                                                initialfile='result.jpg', defaultextension=".png",
+                                                filetypes=[("Image (jpg)", ("*.jpg"))])
+        if(filename!=""):
+            result = Image.new('RGB', (self.image.width*2+1, self.image.height), (0, 0, 0))
+            result.paste(self.imageGreyBound,(0,0))
+            result.paste(self.imageGreyExpBound,(self.image.width+1,0))
+            result.save(filename)
+
+            grey = Image.new('RGB', (self.image.width*2+1, self.image.height), (255, 255, 255))
+            grey.paste(self.imageGrey,(0,0))
+            grey.paste(self.imageGreyExp,(self.image.width+1,0))
+            grey.save(filename[:-4]+"_grey"+filename[-4:])
     def __getGreyOwn(self):
         res = Image.new('RGB', (self.image.width, self.image.height), (0,0,0))
         for y in range(self.image.height):
