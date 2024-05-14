@@ -90,6 +90,7 @@ class App:
         self.photoGreyExpBound = ImageTk.PhotoImage(self.imageGreyExpBound)
         self.с_imageGreyExpBound = self.canvas.create_image(2*self.canvasW+2, self.canvasH+1, anchor='nw', image=self.photoGreyExpBound)
 
+        self.__saveBorders()
 
     def __getGrey(self):
         res = self.image.convert("L")
@@ -102,6 +103,11 @@ class App:
         m3=max(color[2],255-color[2])
         return int((abs(value[0]-color[0])*255)/m1*0.21+(abs(value[1]-color[1])*255)/m2*0.71
                    +(abs(value[2]-color[2])*255)/m3*0.08)
+    def __saveBorders(self):
+        res = Image.new('RGB', (self.image.width*2+1, self.image.height), (0, 0, 0))
+        res.paste(self.imageGreyBound,(0,0))
+        res.paste(self.imageGreyExpBound,(self.image.width+1,0))
+        res.save("result.jpg")
     def __getGreyOwn(self):
         res = Image.new('RGB', (self.image.width, self.image.height), (0,0,0))
         for y in range(self.image.height):
