@@ -1,7 +1,7 @@
 #License: CC BY
 #Roman Gutenkov, 29/12/24
-#Version: 0.2
-
+#Version: 0.4
+import tkinter
 from tkinter import *
 from tkinter import filedialog
 from ttkwidgets.autocomplete import AutocompleteCombobox
@@ -18,11 +18,12 @@ class App:
         self.window = Tk()
         self.window.title("MP3 метаданные")
         self.window.geometry("280x150")
+        self.window.resizable(False, False)
         self.frame = Frame(self.window)
         self.frame.grid()
         self.path=""
 
-        genre = ["Blues",
+        self._genre = ["Blues",
             "Classic Rock",
             "Country",
             "Dance",
@@ -215,40 +216,48 @@ class App:
             "Garage Rock",
             "Psybien"]
 
+        check = (self.window.register(self.__correctChange), "%P")
+
         self.btnFileChoose = Button(self.frame, text="Выбрать .mp3", command=self.__open)
         self.btnFileChoose.grid(column=0, row=0)
-        self.btnFileSave = Button(self.frame, text="Сохранить метаданные", command=self.__save, state=DISABLED)
+        self.btnFileSave = Button(self.frame, text="-//-", command=self.__save, state=DISABLED)
         self.btnFileSave.grid(column=1, row=0)
 
         self.lblArtist = Label(self.frame, text="Исполнитель")
-        self.lblArtist.grid(column=0, row=1, padx=10)
-        self.entryArtist = Entry(self.frame, text="", state=DISABLED, validatecommand=self.__anyChange)
-        self.entryArtist.grid(column=1, row=1, padx=10)
+        self.lblArtist.grid(column=0, row=1, padx=10, sticky='w')
+        self.entryArtist = Entry(self.frame, text="", width=22, state=DISABLED, validatecommand=check)
+        self.entryArtist.grid(column=1, row=1, padx=10, sticky='w')
 
         self.lblAlbum = Label(self.frame, text="Альбом")
-        self.lblAlbum.grid(column=0, row=2, padx=10)
-        self.entryAlbum = Entry(self.frame, text="", state=DISABLED, validatecommand=self.__anyChange)
-        self.entryAlbum.grid(column=1, row=2, padx=10)
+        self.lblAlbum.grid(column=0, row=2, padx=10, sticky='w')
+        self.entryAlbum = Entry(self.frame, text="", width=22, state=DISABLED, validatecommand=check)
+        self.entryAlbum.grid(column=1, row=2, padx=10, sticky='w')
 
         self.lblName = Label(self.frame, text="Название")
-        self.lblName.grid(column=0, row=3, padx=10)
-        self.entryName = Entry(self.frame, text="", state=DISABLED, validatecommand=self.__anyChange)
-        self.entryName.grid(column=1, row=3, padx=10)
+        self.lblName.grid(column=0, row=3, padx=10, sticky='w')
+        self.entryName = Entry(self.frame, text="", width=22, state=DISABLED, validatecommand=check)
+        self.entryName.grid(column=1, row=3, padx=10, sticky='w')
 
-        self.lblNumber = Label(self.frame, text="Номер трека")
-        self.lblNumber.grid(column=0, row=4, padx=10)
-        self.spinNum = Spinbox(self.frame, from_ =1, to_=50, state=DISABLED, validatecommand=self.__anyChange)
-        self.spinNum.grid(column=1, row=4, padx=10)
+        self.lblNumber = Label(self.frame, text="Номер трека", justify="left")
+        self.lblNumber.grid(column=0, row=4, padx=10, sticky='w')
+        self.spinNum = Spinbox(self.frame, from_ =1, to_=50, width=21, state=DISABLED, validatecommand=check)
+        self.spinNum.grid(column=1, row=4, padx=10, sticky='w')
 
         self.lblGenre = Label(self.frame, text="Жанр")
-        self.lblGenre.grid(column=0, row=5, padx=10)
-        self.comboGenre = AutocompleteCombobox(self.frame, completevalues=genre, state=DISABLED, validatecommand=self.__anyChange)
-        self.comboGenre.grid(column=1, row=5, padx=10)
+        self.lblGenre.grid(column=0, row=5, padx=10, sticky='w')
+        self.comboGenre = AutocompleteCombobox(self.frame, completevalues=self._genre,
+                                               width=20, state=DISABLED, validatecommand=check)
+        self.comboGenre.grid(column=1, row=5, padx=10, sticky='w')
 
         self.window.mainloop()
 
-    def __anyChange(self):
-        self.btnFileSave['text'] = "Сохранить метаданные"
+    def __correctChange(self, newStr=""):
+        if(self.comboGenre.get() in self._genre):
+            self.btnFileSave["state"] = "normal"
+            self.btnFileSave['text'] = "Сохранить метаданные"
+            return True
+        return False
+
     def __open(self):
         path = (filedialog.askopenfilename())
         if(path.endswith(".mp3")):
@@ -259,8 +268,8 @@ class App:
             self.entryName["state"]     = "normal"
             self.spinNum["state"]       = "normal"
             self.comboGenre["state"]    = "normal"
-            self.btnFileSave["state"]   = "normal"
-            self.btnFileSave['text']    = "Сохранить метаданные"
+            self.btnFileSave["state"] = "normal"
+            self.btnFileSave['text'] = "Сохранить метаданные"
 
             self.entryArtist.delete(0,END)
             self.entryAlbum.delete(0,END)
